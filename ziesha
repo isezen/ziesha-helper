@@ -1,17 +1,10 @@
 #!/usr/bin/env bash
 # shellcheck disable=2059
 #
-# This script contains `sudo` command to download/update required packages and register system service for Massa.
+# Manage Ziesha-network infrastructure.
 #
 # - download, make executable and run script:
-#
-#   1- bash <(curl -sL https://raw.githubusercontent.com/isezen/testscript/main/massa2.sh) && . ~/.profile
-#   2- wget -qO massa.sh https://t.ly/1qqz && chmod +x massa.sh && ./massa.sh
-#   3- wget -qO massa.sh https://raw.githubusercontent.com/isezen/testscript/main/massa2.sh && chmod +x massa.sh && ./massa.sh
-#
-# - Just type `node-status` to run.
-# - to see the logs, type `see-logs.
-#
+#   $ wget -qO ~/.local/bin/ziesha https://raw.githubusercontent.com/isezen/ziesha-helper/main/ziesha && chmod +x ~/.local/bin/ziesha
 
 # # shellcheck disable=2034
 VERSION=0.1
