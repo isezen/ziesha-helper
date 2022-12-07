@@ -61,7 +61,7 @@ msg_warn () { ylw "$WARN $@"; }
 msg_err  () { red "$CROSS ${@}"; }
 msg_note () { wht "$NOTE $@"; }
 
-rep ()   { eval "printf -- '${1:-'-'}%.0s' {1.."${2:-60}"}"; }
+rep ()   { eval "printf -- '${1:-'-'}%.0s' {1.."${2:-65}"}"; }
 line ()  { col ${2:-$M} $(rep ${1:-'-'}); }
 line1 () { line; }
 line2 () { line = ${1:-$M}; }
