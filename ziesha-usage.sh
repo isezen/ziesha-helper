@@ -42,24 +42,22 @@ function _usage_main () {
     -v | --version  : Show Ziesha Helper version
 
   $COMMANDS
-    -i | install    : Install a Ziesha tool
-    -u | update     : Update a Ziesha tool
-    -r | remove     : Remove/uninstall a Ziesha tool
-    -l | log        : Show log of a Ziesha tool
-    -a | autoupdate : Set auto-update on/off
-    -s | set        : Set a variable
-    -g | get        : Get a variable
-       | download   : Download zoro dat files
-       | init       : Initialize bazuka
-       | run        : Run selected tool
-       | reset      : Reset bazuka and wallet
-       | start      : Start a service
-       | stop       : Stop a service
-       | restart    : Restart a service
+    install    : Install a Ziesha tool
+    update     : Update a Ziesha tool
+    remove     : Remove/uninstall a Ziesha tool
+    log        : Show log of a Ziesha tool
+    set        : Set a variable
+    get        : Get a variable
+    download   : Download zoro dat files
+    init       : Initialize bazuka
+    run        : Run selected tool
+    reset      : Reset bazuka and wallet
+    start      : Start a service
+    stop       : Stop a service
+    restart    : Restart a service
 
   $USAGE
     [0;49;96m$ $EXE install bazuka
-    $ $EXE -i bazuka
     $ $EXE remove zoro
     $ $EXE set discord-handle MYHANDLE
     $ $EXE start uzi-pool[0m
@@ -73,17 +71,24 @@ function _usage () {
   cat<<EOF
 
   $DESCRIPTION
-    $1 specified Ziesha tool
-    Tools: ('$APPS')
+    $1 specified Ziesha tool or rust.
 
   $OPTIONS
     -h | --help : Shows this message
+  
+  $COMMANDS
+    bazuka    : $1 bazuka
+    uzi-miner : $1 uzi-miner
+    uzi-pool  : $1 uzi-pool
+    zoro      : $1 zoro
+    rust      : $1 rust toolchain
+    
 
-  $USAGE
-    [0;49;96m$ $EXE $1 rust # will $1 rust toolchain
-    $ $EXE $1 bazuka # will $1 bazuka
-    $ $EXE $1 bazuka zoro # will $1 bazuka and zoro both
-    $ $EXE $1 all # will install all Ziesha tools[0m
+  $USAGE[0;49;96m
+    $ $EXE $1 rust        [0;33m# will $1 rust toolchain[0;49;96m
+    $ $EXE $1 bazuka      [0;33m# will $1 bazuka[0;49;96m
+    $ $EXE $1 bazuka zoro [0;33m# will $1 bazuka and zoro both[0;49;96m
+    $ $EXE $1 all         [0;33m# will $1 all Ziesha tools[0m
 
 EOF
 }
@@ -95,17 +100,22 @@ function _usage_run () {
 
   $DESCRIPTION
     Run specified Ziesha tool.
-    You can run only a tool at a time.
-    Tools: ('$APPS')
+    You can run only one tool at a time.
 
   $OPTIONS
     -h | --help : Shows this message
 
-  $USAGE
-    [0;49;96m$ $EXE run bazuka # will run bazuka
-    $ $EXE run zoro # will run zoro
-    $ $EXE run zoro # will run uzi-pool
-    $ $EXE run zoro # will run uzi-miner[0m
+  $COMMANDS
+    bazuka    : $1 bazuka
+    uzi-miner : $1 uzi-miner
+    uzi-pool  : $1 uzi-pool
+    zoro      : $1 zoro
+
+  $USAGE[0;49;96m
+    $ $EXE run bazuka [0;33m# will run bazuka[0;49;96m
+    $ $EXE run zoro   [0;33m# will run zoro[0;49;96m
+    $ $EXE run zoro   [0;33m# will run uzi-pool[0;49;96m
+    $ $EXE run zoro   [0;33m# will run uzi-miner[0m
 
 EOF
 }
@@ -116,16 +126,23 @@ function _usage_log () {
   cat<<EOF
 
   $DESCRIPTION
-    Show log of specified tool
-    Tools: ('$APPS')
+    Show log of specified tool.
 
   $OPTIONS
     -n | --nlines   : Initial number of lines to output [0;33m(Default is 30)[0m
     -c | --no-color : No colorized output
     -h | --help     : Shows this message
 
-  $USAGE
-    [0;49;96m$ $EXE log bazuka
+  $COMMANDS
+    bazuka      : Show log of bazuka
+    uzi-miner   : Show log of uzi-miner
+    uzi-pool    : Show log of uzi-pool
+    zoro        : Show log of zoro
+    auto-update : Show log of auto-update process
+
+  $USAGE[0;49;96m
+    $ $EXE log bazuka
+    $ $EXE log auto-update
     $ $EXE log zoro -c
     $ $EXE log uzi-pool -n 100
     $ $EXE log uzi-miner[0m
@@ -145,20 +162,20 @@ function _usage_get () {
     -h | --help : Shows this message
 
   $COMMANDS
-    GENERAL:
+    [0;33mGENERAL:[0m
      discord-handle  : Your discord handle
      network         : Network name
      update-interval : Auto-update interval
-    POOL:
+    [0;33mPOOL:[0m
      share-capacity  : Share Capacity
      share-easiness  : Share Easiness
-     reward-ratio   : Reward Ratio
-     reward-delay   : Reward Delay
-    ZORO:
-     zoro-seed      : Zoro Seed
-     update-dat     : update.dat file path
-     deposit-dat    : deposit.dat file path
-     withdraw-dat   : withdraw.dat file path
+     reward-ratio    : Reward Ratio
+     reward-delay    : Reward Delay
+    [0;33mZORO:[0m
+     zoro-seed       : Zoro Seed
+     update-dat      : update.dat file path
+     deposit-dat     : deposit.dat file path
+     withdraw-dat    : withdraw.dat file path
     
 
   $USAGE
@@ -184,16 +201,16 @@ function _usage_set () {
 
   $OPTIONS
      -h | --help            : Shows this message
-    GENERAL:
+    [0;33mGENERAL:[0m
      -d | --discord-handle  : Your discord handle
      -n | --network         : Network name
      -u | --update-interval : Auto-update interval [0;33m(Default is $UPDATE_INTERVAL seconds)[0m
-    POOL:
+    [0;33mPOOL:[0m
      -c | --share-capacity  : Share Capacity [0;33m(Default is $SHARE_CAPACITY)[0m
      -e | --share-easiness  : Share Easiness [0;33m(Default is $SHARE_EASINESS)[0m
      -o | --reward-ratio    : Reward Ratio   [0;33m(Default is $REWARD_RATIO)[0m
      -y | --reward-delay    : Reward Delay   [0;33m(Default is $REWARD_DELAY)[0m
-    ZORO:
+    [0;33mZORO:[0m
      -z | --zoro-seed       : Zoro Seed
      -t | --update-dat      : update.dat file path
                               [0;33m(Default is $UPDATE_DAT)[0m
@@ -205,7 +222,7 @@ function _usage_set () {
   $USAGE
     [0;49;96m$ $EXE set --discord-handle MYHANDLE
     $ $EXE set -d MYHANDLE [0;33m# same as above[0;49;96m
-    $ $EXE set -z 12345 [0;33m# set zoro seed[0;49;96m
+    $ $EXE set -z 12345    [0;33m# set zoro seed[0;49;96m
     $ $EXE set -c 450 -e 300 -o 0.02
     $ $EXE set --reward-delay 3
     $ $EXE set --deposit-dat $HOME/deposit.dat[0m
@@ -246,6 +263,11 @@ function _usage_download () {
   $OPTIONS
     -h | --help : Shows this message
 
+  $COMMANDS
+    update-dat   : Download update.dat file
+    deposit-dat  : Download deposit.dat file
+    withdraw-dat : Download withdraw.dat file
+
   $USAGE
     [0;49;96m$ $EXE download update-dat
     $ $EXE download deposit-dat
@@ -259,15 +281,23 @@ function _usage_reset () {
   cat<<EOF
 
   $DESCRIPTION
-    Reset bazuka initialization parameters and wallet
-    Argument 'all' will delete both .bazuka.yaml and .bazuka-wallet files
+    Reset bazuka initialization parameters and wallet.
+    Argument 'all' will delete '.bazuka' folder, 
+    .bazuka.yaml and .bazuka-wallet files
 
   $OPTIONS
     -h | --help : Shows this message
+  
+  $COMMANDS
+    bazuka : Delete .bazuka.yaml
+    wallet : Delete .bazuka-wallet
+    db     : Delete .bazuka folder
+    all    : Delete all init params
 
   $USAGE
-    [0;49;96m$ $EXE reset bazuka
-    $ $EXE reset wallet
+    [0;49;96m$ $EXE reset bazuka [0;33m # will delete .bazuka.yaml[0;49;96m
+    $ $EXE reset wallet [0;33m # will delete .bazuka-wallet[0;49;96m
+    $ $EXE reset db     [0;33m # will delete .bazuka database folder[0;49;96m
     $ $EXE reset all[0m
 
 EOF
@@ -279,16 +309,23 @@ function _usage_service () {
   cat<<EOF
 
   $DESCRIPTION
-    $1 specified service running in the background
+    $1 specified service running in the background.
 
   $OPTIONS
     -h | --help : Shows this message
 
-  $USAGE
-    [0;49;96m$ $EXE start bazuka # will start bazuka in background
-    $ $EXE start auto-update # will start auto-update
-    $ $EXE stop zoro # will stop if it is running
-    $ $EXE restart uzi-pool # will restart uzi-pool[0m
+  $COMMANDS
+    bazuka      : $1 bazuka
+    uzi-miner   : $1 uzi-miner
+    uzi-pool    : $1 uzi-pool
+    zoro        : $1 zoro
+    auto-update : $1 auto-update
+
+  $USAGE[0;49;96m
+    $ $EXE start bazuka      [0;33m# will start bazuka in background[0;49;96m
+    $ $EXE start auto-update [0;33m# will start auto-update[0;49;96m
+    $ $EXE stop zoro         [0;33m# will stop if it is running[0;49;96m
+    $ $EXE restart uzi-pool  [0;33m# will restart uzi-pool[0m
 
 EOF
 }
