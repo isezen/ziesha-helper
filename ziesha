@@ -43,7 +43,7 @@ After=network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=/home/ziesha
+WorkingDirectory=$HOME
 Environment="RUST_BACKTRACE=full"
 ExecStart=$HOME/.local/bin/ziesha run %i
 Restart=always
@@ -194,6 +194,7 @@ service () {
                 [ ! -d "$SYSTEMD_PATH" ] && mkdir -p "$SYSTEMD_PATH"
                 if [ ! -f "$SYSTEMD_PATH/ziesha@.service" ]; then
                     save_embedded_content service
+                    echo "HELLO"
                 fi
                 systemctl --user "$status" ziesha@"$a" >> "$LOG_FILE" 2>&1
                 systemctl --user daemon-reload >> "$LOG_FILE" 2>&1
