@@ -7,38 +7,24 @@
 #   $ wget -qO ~/.local/bin/ziesha https://raw.githubusercontent.com/isezen/ziesha-helper/main/ziesha && chmod +x ~/.local/bin/ziesha
 
 # # shellcheck disable=2034
-VERSION=0.1
+AUTHOR=pentafenolin
 
 ZIESHA_PATH=$HOME/.local/ziesha
 ZIESHA_HELPER_PATH=$ZIESHA_PATH/ziesha-helper
 ZORO_PATH=$ZIESHA_PATH/zoro-dat
 SYSTEMD_PATH=$HOME/.config/systemd/user
-PROFILE="$HOME/.profile"
 BOOTSTRAP="--bootstrap 65.108.193.133:8765"
 # -------------------------------------------------------------
 GITUSR="ziesha-network"
 GITURL="https://github.com/$GITUSR/%s.git"
-
 GITURLRAW="https://raw.githubusercontent.com/%s/%s"
+
 CARGO_TOML="$GITURLRAW/master/Cargo.toml"
 APPS="bazuka zoro uzi-pool uzi-miner"
-declare -r CARGO_ENV="$HOME/.cargo/env"
-SCRIPT_REMOTE="$GITURLRAW/main/massa.sh"
+CARGO_ENV="$HOME/.cargo/env"
+SCRIPT_REMOTE="$GITURLRAW/main/VERSION"
 EXE="${0##*/}"
-LOG_FILE="${0%/*}/ziesha.log"
-
-# shellcheck source=~/.profile
-source "$PROFILE"
-
-# Download and source a remote script
-source_script () {
-    local URL="https://raw.githubusercontent.com/isezen/ziesha-helper/main"
-    [ ! -f "$ZIESHA_HELPER_PATH/$1" ] && 
-        curl -s -o "$ZIESHA_HELPER_PATH/$1" "$URL/$1"
-    source "$ZIESHA_HELPER_PATH/$1"
-}
-source_script "ziesha-common.sh"
-source_script "ziesha-usage.sh"
+LOG_FILE="$HOME/.ziesha.log"
 
 # -------------------------------------------------------------
 # DEFINE SCRIPTS TO SAVE HERE
@@ -61,6 +47,22 @@ RestartSec=3
 WantedBy=default.target
 EOF
 )
+
+# -------------------------------------------------------------
+# SOURCING
+# Download and source a remote script
+source_script () {
+    local URL="https://raw.githubusercontent.com/isezen/ziesha-helper/main"
+    [ ! -f "$ZIESHA_HELPER_PATH/$1" ] && 
+        curl -s -o "$ZIESHA_HELPER_PATH/$1" "$URL/$1"
+    source "$ZIESHA_HELPER_PATH/$1"
+}
+source_script "ziesha-common.sh"
+source_script "ziesha-usage.sh"
+[ -f "$HOME/.ziesha.settings" ] && source "$HOME/.ziesha.settings"
+# shellcheck source=~/.profile
+source "$PROFILE"
+
 # -------------------------------------------------------------
 # DEFAULT VARIABLES
 
@@ -107,12 +109,15 @@ version () {
     fi
     local ret=
     if [ "$t" = "local" ]; then
+        [ "$a" = "ziesha" ] && 
+        ret=$(grep -i "^version = " "$ZIESHA_HELPER_PATH/VERSION") ||
         ret=$([ -z "$(which "$a")" ] && echo 'NOTSET' || echo "$($a --version)")
     else
         ret=$(remote "$a" | grep -i "^version = ")
     fi
     echo "$ret" | tail -n 1 | awk '{print $NF}' | tr -d '"'
 }
+VERSION=$(version local ziesha)
 
 # Get/search binary path
 get_bin_loc () { which "${1:-bazuka}"; }
@@ -202,7 +207,6 @@ service () {
                 [ ! -d "$SYSTEMD_PATH" ] && mkdir -p "$SYSTEMD_PATH"
                 if [ ! -f "$SYSTEMD_PATH/ziesha@.service" ]; then
                     save_embedded_content service
-                    echo "HELLO"
                 fi
                 systemctl --user "$status" ziesha@"$a" >> "$LOG_FILE" 2>&1
                 systemctl --user daemon-reload >> "$LOG_FILE" 2>&1
@@ -210,7 +214,7 @@ service () {
         ;;
         disable)
             if service_is_active "$a"; then
-                systemctl --user "$status" ziesha@"$a" >> "$LOG_FILE" 2>&1
+                systemctl --user "$status" --now ziesha@"$a" >> "$LOG_FILE" 2>&1
                 systemctl --user daemon-reload >> "$LOG_FILE" 2>&1
             fi
         ;;
@@ -344,11 +348,12 @@ show_log () {
     local short=true
     local timestamp=false
     local a=${1:-bazuka}; shift
-    if ! contains "$APPS" "$a"; then
+    if ! contains "$APPS auto-update" "$a"; then
         msg_err "$a is not a Ziesha tool. ('$APPS')"
         exit 1
     fi
-    if is_installed "$a"; then
+
+    if ([ "$a" = "auto-update" ] || is_installed "$a"); then
         while [[ $# -gt 0 ]]; do
             case $1 in
                 -n|--nlines)
@@ -372,7 +377,9 @@ show_log () {
                     _unknown_option "$1"; exit 1 ;;
             esac
         done
-        cmd="journalctl -q -f -o short-iso-precise -n \"$nlines\" _COMM=\"$a\""
+        # cmd="journalctl -q -f -o short-iso-precise -n \"$nlines\" _COMM=\"$a\""
+        cmd="journalctl -q -f -o short-iso-precise -n \"$nlines\" --user-unit=ziesha@$a"
+        echo "$cmd"
         cmd+=" | stdbuf -oL cut --complement -d' ' -f2,3"
         cmd+=" | sed -u 's/\(:[0-9][0-9]\)\.[0-9]\{6\}/\1/g'"
         cmd+=" | sed -u 's/\+0000//'"
