@@ -245,6 +245,7 @@ check_a () {
     return 1
 }
 
+# Install/update ziesha-helper
 install_me () {
     mkdir -p "$HOME/.local/bin" && a2p
     mkdir -p "$ZIESHA_PATH" && {
@@ -294,12 +295,10 @@ update_app () {
     local vc; local vr;
     local a=${@:-bazuka}
     if [ "$a" = "rust" ]; then
-        rustup self update
-        return
+        rustup self update; return
     fi
     if [ "$a" = "me" ]; then
-        install_me
-        return
+        install_me; return
     fi
     check_rust_installed
     if ! check_a update_app "$a"; then
@@ -328,6 +327,16 @@ update_app () {
     fi
 }
 
+# Remove Ziesha-helper from system
+remove_me () {
+    for t in $(get_installed_tools); do
+        service_is_active "$t" && service disable "$t"
+    done
+    rm -rf "$ZIESHA_HELPER_PATH"
+    rm "$HOME/.local/bin/ziesha"
+    msg_info "Ziesha removed from your system! :("
+}
+
 # Remove/unimnstall given Ziesha app or rust
 remove_app () {
     local a=${@:-bazuka}
@@ -335,7 +344,10 @@ remove_app () {
     if [ "$a" = "rust" ]; then
         rustup self uninstall -y
         msg_info "$a removed from your system :("
-        exit 0
+        return
+    fi
+    if [ "$a" = "me" ]; then
+        remove_me; return
     fi
     if is_installed "$a"; then
         if service_is_active "$a"; then
