@@ -186,7 +186,6 @@ service () {
         start)
             if ! service_is_active "$a"; then
                 service enable "$a"
-                systemctl --user start ziesha@"$a"
                 msg_info "$a is started."
             else
                 msg_warn "$a is already running."
@@ -195,7 +194,6 @@ service () {
         ;;
         stop)
             if service_is_active "$a"; then
-                systemctl --user stop ziesha@"$a"
                 service disable "$a"
                 msg_info "$a is stopped successfully."
             else
@@ -219,12 +217,14 @@ service () {
                 if [ ! -f "$SYSTEMD_PATH/ziesha@.service" ]; then
                     save_embedded_content service
                 fi
-                systemctl --user "$status" ziesha@"$a" >> "$LOG_FILE" 2>&1
+                # systemctl --user start ziesha@"$a"
+                systemctl --user "$status" --now ziesha@"$a" >> "$LOG_FILE" 2>&1
                 systemctl --user daemon-reload >> "$LOG_FILE" 2>&1
             fi
         ;;
         disable)
             if service_is_active "$a"; then
+                # systemctl --user stop ziesha@"$a"
                 systemctl --user "$status" --now ziesha@"$a" >> "$LOG_FILE" 2>&1
                 systemctl --user daemon-reload >> "$LOG_FILE" 2>&1
             fi
@@ -341,9 +341,14 @@ update_app () {
 
 # Remove Ziesha-helper from system
 remove_me () {
-    for t in $(get_installed_tools); do
-        service_is_active "$t" && service disable "$t"
-    done
+    local def="$SYSTEMD_PATH/default.target.wants"
+    if [ -d "$def" ]; then
+        for f in "$def"/ziesha@*; do
+            f="${f##*/}"
+            service_is_active "$f" && service disable "$f"
+        done
+    fi
+    rm "$SYSTEMD_PATH/ziesha@.service"
     rm -rf "$ZIESHA_HELPER_PATH"
     rm "$HOME/.local/bin/ziesha"
     msg_info "Ziesha removed from your system! :("
