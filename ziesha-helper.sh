@@ -18,7 +18,7 @@ BOOTSTRAP="--bootstrap 65.108.193.133:8765"
 GITUSR="ziesha-network"
 GITURL="https://github.com/$GITUSR/%s.git"
 GITURLRAW="https://raw.githubusercontent.com/%s/%s"
-
+ZIESHA_URL="https://raw.githubusercontent.com/isezen/ziesha-helper/main"
 CARGO_TOML="$GITURLRAW/master/Cargo.toml"
 APPS="bazuka zoro uzi-pool uzi-miner"
 CARGO_ENV="$HOME/.cargo/env"
@@ -52,9 +52,8 @@ EOF
 # SOURCING
 # Download and source a remote script
 source_script () {
-    local URL="https://raw.githubusercontent.com/isezen/ziesha-helper/main"
     [ ! -f "$ZIESHA_HELPER_PATH/$1" ] && 
-        curl -s -o "$ZIESHA_HELPER_PATH/$1" "$URL/$1"
+        curl -s -o "$ZIESHA_HELPER_PATH/$1" "$ZIESHA_URL/$1"
     source "$ZIESHA_HELPER_PATH/$1"
 }
 source_script "ziesha-common.sh"
@@ -246,16 +245,27 @@ check_a () {
     return 1
 }
 
+install_me () {
+    mkdir -p "$HOME/.local/bin" && a2p
+    mkdir -p "$ZIESHA_PATH" && {
+        for f in ziesha-helper.sh ziesha-common.sh ziesha-usage.sh \
+                 VERSION AUTHOR; do
+            curl -s -o "$ZIESHA_HELPER_PATH/$f" "$ZIESHA_URL/$f"
+        done
+        curl -s -o "$HOME/.local/bin/ziesha" "$ZIESHA_URL/ziesha"
+    }
+}
+
 # Install given Ziesha app
 install_app () {
     local a=${@:-bazuka}
     if [ "$a" = "rust" ]; then
-        if ! rust_is_installed; then
-            install_rust
-        else
-            msg_warn "$a is already installed."
-        fi
+        rust_is_installed && msg_warn "$a is already installed." || install_rust
         echo -e ''
+        return
+    fi
+    if [ "$a" = "me" ]; then
+        install_me
         return
     fi
     check_rust_installed
@@ -379,7 +389,7 @@ show_log () {
         done
         # cmd="journalctl -q -f -o short-iso-precise -n \"$nlines\" _COMM=\"$a\""
         cmd="journalctl -q -f -o short-iso-precise -n \"$nlines\" --user-unit=ziesha@$a"
-        echo "$cmd"
+        # echo "$cmd"
         cmd+=" | stdbuf -oL cut --complement -d' ' -f2,3"
         cmd+=" | sed -u 's/\(:[0-9][0-9]\)\.[0-9]\{6\}/\1/g'"
         cmd+=" | sed -u 's/\+0000//'"
