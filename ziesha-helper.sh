@@ -295,7 +295,11 @@ update_app () {
     local a=${@:-bazuka}
     if [ "$a" = "rust" ]; then
         rustup self update
-        exit 0
+        return
+    fi
+    if [ "$a" = "me" ]; then
+        install_me
+        return
     fi
     check_rust_installed
     if ! check_a update_app "$a"; then
