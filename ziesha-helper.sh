@@ -90,6 +90,18 @@ remote () {
     curl -s "$address"
 }
 
+set_author_info () {
+    get_author_info () {
+        grep -i "^$1 = " "$ZIESHA_HELPER_PATH/AUTHOR" | 
+            awk '{print $NF}' | tr -d '"'
+    }
+    AUTHOR_NAME=$(get_author_info author)
+    AUTHOR_TWITTER=$(get_author_info twitter)
+    AUTHOR_DISCORD=$(get_author_info discord)
+    AUTHOR_GITHUB=$(get_author_info github)
+}
+set_author_info
+
 # Get version of specified app
 # Usage Examples:
 #   version remote bazuka

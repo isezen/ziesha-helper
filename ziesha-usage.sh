@@ -21,10 +21,10 @@ function _usage_header () {
   _version
   cat<<EOF
 
-  Made with ❤️  by [0;31mPentafenolin[0m [0;34m(2022)[0m
-  [0;32m● Discord: [0;33mpentafenolin#9413[0m
-  [0;32m● Twitter: [0;33m@pentafenolin[0m (Follow me! ^_^)
-  [0;32m● Github : [0;33misezen[0m
+  Made with ❤️  by [0;31m$AUTHOR_NAME[0m [0;34m(2022)[0m
+  [0;32m● Discord: [0;33m$AUTHOR_DISCORD[0m
+  [0;32m● Twitter: [0;33m@$AUTHOR_TWITTER[0m (Follow me! ^_^)
+  [0;32m● Github : [0;33m$AUTHOR_GITHUB[0m
 
 EOF
 }
