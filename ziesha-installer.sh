@@ -15,7 +15,7 @@ EOF
 )
 
 ZIESHA_PATH=$HOME
-PROFILE=$HOME/.profile
+PROFILE="$HOME/.profile"
 URL="https://raw.githubusercontent.com/isezen/ziesha-helper/main/%s"
 EXE="${0##*/}"
 LOG_FILE="$HOME/ziesha-installer.log"
@@ -23,7 +23,7 @@ LOG_FILE="$HOME/ziesha-installer.log"
 # shellcheck source=~/.profile
 source "$PROFILE"
 
-source <(curl -s $(printf "$URL" "ziesha_common.sh"))
+source <(curl -s $(printf "$URL" "ziesha-common.sh"))
 
 install_pre_deps "screen jq curl wget git ccze"
 clear
@@ -43,7 +43,7 @@ cyn " - Solo miners, select (3).\n"
 cyn " - Pool operators, select (4).\n"
 line2; echo ""
 msg_info "Ziesha Helper is installed on your system.\n"
-echo -e "  Run ${B}'. ~/.profile'${NONE} or ${C}log out & in${NONE} to be able to run ${R}'ziesha'${NONE} helper."
+echo -e "  Run ${B}'. ~/.profile'${NONE} or ${C}log out & in${NONE} and type ${R}'ziesha -h'${NONE} to get help."
 line2; echo -e "\n"
 
 
