@@ -64,11 +64,10 @@ msg_note () { wht "$NOTE $@"; }
 rep ()   { eval "printf -- '${1:-'-'}%.0s' {1.."${2:-65}"}"; }
 line ()  { col ${2:-$M} $(rep ${1:-'-'}); }
 line1 () { line; }
-line2 () { line = ${1:-$M}; }
+line2 () { line '=' ${1:-$M}; }
 
-# get_last_sha () {
-#     ret=$(curl -s https://api.github.com/repos/isezen/testscript/commits | jq)
-# }
+# Check if $1 contains $2
+contains () { [[ $1 =~ (^|[[:space:]])"$2"($|[[:space:]]) ]]; }
 
 # Return file path if exist
 get_file_if_exist () { [ -f "$1" ] && echo "$1"; }
