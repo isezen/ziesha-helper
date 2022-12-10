@@ -1,13 +1,10 @@
 #!/usr/bin/env bash
-# shellcheck disable=2059
+# shellcheck disable=1090,1091,2034,2059
 #
 # Manage Ziesha-network infrastructure.
 #
 # - download, make executable and run script:
 #   $ wget -qO ~/.local/bin/ziesha https://raw.githubusercontent.com/isezen/ziesha-helper/main/ziesha && chmod +x ~/.local/bin/ziesha
-
-# # shellcheck disable=2034
-AUTHOR=pentafenolin
 
 ZIESHA_PATH=$HOME/.local/ziesha
 ZIESHA_HELPER_PATH=$ZIESHA_PATH/ziesha-helper
@@ -364,6 +361,7 @@ update_app () {
 
 # Remove Ziesha-helper from system
 remove_me () {
+    msg_warn "This operation will only remove Ziesha-helper."; echo
     if is_yes "Are you sure to remove Ziesha-helper?"; then
         for s in $(get_running_services); do
             echo "$s"
@@ -379,19 +377,19 @@ remove_me () {
 # Remove/unimnstall given Ziesha app or rust
 remove_app () {
     local a=${@:-bazuka}
-    check_a remove_app "$a"
     if [ "$a" = "rust" ]; then
-        rustup self uninstall -y
-        msg_info "$a removed from your system :("
-        return
+        if is_yes "Are you sure to remove rust?"; then
+            rustup self uninstall -y
+            msg_info "$a removed from your system :("
+            return
+        fi
     fi
     if [ "$a" = "me" ]; then
         remove_me; return
     fi
+    check_a remove_app "$a"
     if is_installed "$a"; then
-        if service_is_active "$a"; then
-            service disable "$a"
-        fi
+        service_is_active "$a" && service disable "$a"
         rm "$(get_bin_loc "$a")"
         rm -rf "${ZIESHA_PATH:?}/$a"
         if [ "$a" = "bazuka" ]; then
