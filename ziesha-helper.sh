@@ -340,7 +340,7 @@ update_app () {
             now=$(date)
             if [ "$vc" != "$vr" ]; then
                 cd "$ZIESHA_PATH/$a" || return
-                msg_warn "Updating $a $vc"
+                msg_warn "Updating $a $vc to $vr"
                 git pull origin >> "$LOG_FILE" 2>&1
                 source "$CARGO_ENV"
                 cargo update >> "$LOG_FILE" 2>&1
@@ -348,6 +348,9 @@ update_app () {
                 cd "$HOME" || return
                 msg_info "$a was updated to v$(version local "$a")."
                 echo "$now: $a was updated to v$(version local "$a")." >> "$HOME/.ziesha-update.log"
+                if service_is_active "$a"; then
+                    service "restart" "$a"
+                fi
             else
                 msg_warn "$a is up-to-date."
                 echo "$now: $a is up-to-date." >> "$HOME/.ziesha-update.log"
@@ -665,7 +668,7 @@ run () {
         "zoro")
             [[ -z "$ZORO_SEED" ]] && { msg_err "zoro-seed is not set" \
             "Run 'ziesha set zoro-seed MYSEED'"; exit 0; }
-            $bin --node 192.168.1.28:8765 --seed "$ZORO_SEED" \
+            $bin --node 127.0.0.1:8765 --seed "$ZORO_SEED" \
             --update-circuit-params "$UPDATE_DAT" \
             --deposit-circuit-params "$DEPOSIT_DAT" \
             --withdraw-circuit-params "$WITHDRAW_DAT" \
