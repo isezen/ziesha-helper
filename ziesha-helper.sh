@@ -78,18 +78,7 @@ source "$PROFILE"
 # -------------------------------------------------------------
 # FUNCTIONS:
 
-contains () { [[ $1 =~ (^|[[:space:]])"$2"($|[[:space:]]) ]]; }
-
-# Get info about project from remote github API
-remote () {
-    local url; local usr; local address
-    local app=${1:-bazuka}
-    url=$([ "$app" = "ziesha" ] && echo $SCRIPT_REMOTE || echo $CARGO_TOML)
-    usr=$([ "$app" = "ziesha" ] && echo "isezen" || echo $GITUSR)
-    address=$(printf "$url" "$usr" "$app")
-    curl -s "$address"
-}
-
+# Get author info from file
 set_author_info () {
     get_author_info () {
         grep -i "^$1 = " "$ZIESHA_HELPER_PATH/AUTHOR" | 
@@ -101,6 +90,16 @@ set_author_info () {
     AUTHOR_GITHUB=$(get_author_info github)
 }
 set_author_info
+
+# Get info about project from remote github API
+remote () {
+    local url; local usr; local address
+    local app=${1:-bazuka}
+    url=$([ "$app" = "ziesha" ] && echo $SCRIPT_REMOTE || echo $CARGO_TOML)
+    usr=$([ "$app" = "ziesha" ] && echo "isezen" || echo $GITUSR)
+    address=$(printf "$url" "$usr" "$app")
+    curl -s "$address"
+}
 
 # Get version of specified app
 # Usage Examples:
@@ -173,42 +172,68 @@ install_rust () {
     fi
 }
 
+get_running_services () {
+    local services=
+    local def="$SYSTEMD_PATH/default.target.wants"
+    if [ -d "$def" ]; then
+        for f in "$def"/ziesha@*; do
+            f="${f##*/}"
+            f=$(echo "$f" | awk -F '[@.]' '{print $2}')
+            services+=" $f"
+        done
+        services=$(echo "$services" | awk '{$1=$1};1')
+    fi
+    echo "$services"
+}
+
 # Start/stop/restart/enable/disable a Ziesha service
 service () {
     local status=${1:-enable}
     local a=${2:-bazuka}
-    if ! contains "$APPS auto-update" "$a"; then
-        msg_err "Unknown service: $a. ('$APPS auto-update')"; echo -e ''
+    if ! contains "$APPS auto-update all" "$a"; then
+        msg_err "Unknown argument: $a. ('$APPS auto-update all')"; echo -e ''
         exit 1
+    fi
+    if [ "$a" = "all" ]; then
+        local services
+        services="$(get_installed_tools) auto-update"
+        if [ "$status" == "start" ]; then
+            for s in $services; do service start "$s"; done
+        else
+            local active_services
+            active_services=$(get_running_services)
+            if [ -z "$active_services" ]; then
+                msg_warn "No active services"; echo; return
+            fi
+            [ "$status" == "stop" ] && 
+            ! is_yes "Do you want to stop all services?" && return
+            for s in $active_services; do service "$status" "$s"; done
+        fi
+        return
+    fi
+
+    # check if arg is a service or not
+    if ! contains "$(get_installed_tools) auto-update" "$a"; then 
+        msg_err "$a is not installed. Please, first install."; echo
+        return
     fi
 
     case $status in
         start)
-            if ! service_is_active "$a"; then
-                service enable "$a"
-                msg_info "$a is started."
-            else
-                msg_warn "$a is already running."
-            fi
-            echo ''
+            service_is_active "$a" && 
+            { msg_warn "$a is already running."; echo; return; }
+            service enable "$a"; msg_info "$a is started."; echo
         ;;
         stop)
-            if service_is_active "$a"; then
-                service disable "$a"
-                msg_info "$a is stopped successfully."
-            else
-                msg_warn "$a is not active. Run 'ziesha start $a'"
-            fi
-            echo ''
+            ! service_is_active "$a" && 
+            { msg_warn "$a is not active. Run 'ziesha start $a'"; echo; return; }
+            service disable "$a"; msg_info "$a is stopped successfully."; echo
         ;;
         restart)
-            if service_is_active "$a"; then
-                systemctl --user restart ziesha@"$a"
-                msg_info "$a is restarted."
-            else
-                msg_warn "$a is not active. Run 'ziesha start $a'"
-            fi
-            echo ''
+            ! service_is_active "$a" &&
+            { msg_warn "$a is not active. Run 'ziesha start $a'"; echo; return; }
+            systemctl --user restart ziesha@"$a"
+            msg_info "$a is restarted."; echo
         ;;
         enable)
             if ! service_is_active "$a"; then
@@ -217,14 +242,12 @@ service () {
                 if [ ! -f "$SYSTEMD_PATH/ziesha@.service" ]; then
                     save_embedded_content service
                 fi
-                # systemctl --user start ziesha@"$a"
                 systemctl --user "$status" --now ziesha@"$a" >> "$LOG_FILE" 2>&1
                 systemctl --user daemon-reload >> "$LOG_FILE" 2>&1
             fi
         ;;
         disable)
             if service_is_active "$a"; then
-                # systemctl --user stop ziesha@"$a"
                 systemctl --user "$status" --now ziesha@"$a" >> "$LOG_FILE" 2>&1
                 systemctl --user daemon-reload >> "$LOG_FILE" 2>&1
             fi
@@ -341,17 +364,16 @@ update_app () {
 
 # Remove Ziesha-helper from system
 remove_me () {
-    local def="$SYSTEMD_PATH/default.target.wants"
-    if [ -d "$def" ]; then
-        for f in "$def"/ziesha@*; do
-            f="${f##*/}"
-            service_is_active "$f" && service disable "$f"
+    if is_yes "Are you sure to remove Ziesha-helper?"; then
+        for s in $(get_running_services); do
+            echo "$s"
+            # service_is_active "$s" && service disable "$s"
         done
+        rm "$SYSTEMD_PATH/ziesha@.service"
+        rm -rf "$ZIESHA_HELPER_PATH"
+        rm "$HOME/.local/bin/ziesha"
+        msg_info "Ziesha removed from your system! :("
     fi
-    rm "$SYSTEMD_PATH/ziesha@.service"
-    rm -rf "$ZIESHA_HELPER_PATH"
-    rm "$HOME/.local/bin/ziesha"
-    msg_info "Ziesha removed from your system! :("
 }
 
 # Remove/unimnstall given Ziesha app or rust
@@ -659,7 +681,7 @@ run () {
         "uzi-miner")
             ;;
         "auto-update")
-            echo "Auto-update is started."
+            msg_info "Auto-update is started."; echo
             installed_apps=$(get_installed_tools)
             while true; do  
                 update_app "$installed_apps"
