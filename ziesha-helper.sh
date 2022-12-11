@@ -3,8 +3,8 @@
 #
 # Manage Ziesha-network infrastructure.
 #
-# - download, make executable and run script:
-#   $ wget -qO ~/.local/bin/ziesha https://raw.githubusercontent.com/isezen/ziesha-helper/main/ziesha && chmod +x ~/.local/bin/ziesha
+# - Run the command below:
+#   $ curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/isezen/ziesha-helper/main/ziesha | bash -s install me
 
 ZIESHA_PATH="$HOME/.local/ziesha"
 ZIESHA_HELPER_PATH="$ZIESHA_PATH/ziesha-helper"
@@ -314,6 +314,7 @@ install_me () {
             curl -s -o "$ZIESHA_HELPER_PATH/$f" "$ZIESHA_URL/$f"
         done
         curl -s -o "$HOME/.local/bin/ziesha" "$ZIESHA_URL/ziesha"
+        chmod +x "$HOME/.local/bin/ziesha"
     }
 }
 
@@ -603,14 +604,14 @@ set_var () {
 
 # Get variable from .profile
 get_var () {
-    local k
-    k=$(toupper "$1" | tr - _)
-    if [ "$k" = "network" ]; then
-        echo "$(grep "$k" "$HOME"/.bazuka.yaml)"
+    local k; k=$(toupper "$1" | tr - _)
+    if [ "$k" = "NETWORK" ]; then
+        v=$(grep "network" "$HOME/.bazuka.yaml")
+        v="${v##*: }"
     else
         [ -z ${k+x} ] && v="NOT SET" || v="${!k}"
-        echo "\"$v\""        
     fi
+    echo "\"$v\""
 }
 
 # Set-up initialization parameters for bazuka.
