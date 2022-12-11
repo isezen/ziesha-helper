@@ -828,8 +828,10 @@ summary () {
             "10min ago" --user-unit=ziesha@"$a")
     nl () { echo "$content" | grep "$1" | wc -l; }
     found () {
-        printf "%-17s" "  Found $1s";
-        echo -e ": ${R}$(nl "${2-$1} found by:")${NONE} (in last 10m)"; }
+        printf "%-18s" "  Found $1s"; echo -e ": "
+        printf "%-4s" "${R}$(nl "${2-$1} found by:")${NONE}";
+        echo -e " (in last 10m)"; 
+    }
     case $a in
         "bazuka")
             ret=$(echo "$content" | grep "Height" | grep "Outdated" | \
