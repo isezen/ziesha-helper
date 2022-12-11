@@ -398,8 +398,7 @@ remove_me () {
     msg_warn "This operation will only remove Ziesha-helper."; echo
     if is_yes "Are you sure to remove Ziesha-helper?"; then
         for s in $(get_running_services); do
-            echo "$s"
-            # service_is_active "$s" && service disable "$s"
+            service_is_active "$s" && service disable "$s"
         done
         [ -f "$SYSTEMD_PATH/ziesha@.service" ] && rm "$SYSTEMD_PATH/ziesha@.service"
         rm -rf "$ZIESHA_HELPER_PATH"
