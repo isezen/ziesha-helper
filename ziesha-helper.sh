@@ -790,59 +790,50 @@ status () {
 }
 
 summary () {
-    local bin
-    local content
-    local installed_apps
     local a=${1:-bazuka}; shift
-
-    # ! contains "$APPS" "$a" && 
-    # { msg_err "$a is not a Ziesha tool. ('$APPS')"; echo -e ''; return; }
-    # ! is_installed "$a" &&
-    # { msg_err "$a is NOT installed. Run 'ziesha install $a'."; 
-    #   echo -e ''; exit 0; }
-    if ! check_a summary "$a"; then
-        ! service_is_active "$a" && { return; }
-        
-        local heal; heal=$(health "$a")
-        local since; since=$(get_since "$a")
-        local runtime; runtime=$(get_runtime "$a")
-        if [ "$heal" == "Good" ]; then sign="${CHECK}"; else sign="${CROSS}"; fi
-        ylw "$a:\n"
-        echo -e "  Status          : ${EG}$heal${sign}${NONE}"
-        echo -e "  Started at      : ${M}$since${NONE}"
-        echo -e "  Running for     : ${EW}$runtime${NONE}"
-        content=$(journalctl -q -o short-iso-precise --since \
-                "10min ago" --user-unit=ziesha@"$a")
-        nl () { echo "$content" | grep "$1" | wc -l; }
-        case $a in
-            "bazuka")
-                ret=$(echo "$content" | grep "Height" | grep "Outdated" | \
-                    tail -n 1 | awk -F ' ' '{print $5}')
-                echo -e "  Current Height  : ${R}$ret${NONE}"
-                ;;
-            "zoro")
-                content=$(journalctl -q -o short-iso-precise --since \
-                        "30min ago" --user-unit=ziesha@"$a")
-                ret=$(echo "$content" | grep "Proving took:" | \
-                    awk -F ' ' '{print $NF}' | sed 's/ms//g')
-                avg=$(echo "$ret" | awk '{ total += $1 } END { print total/NR }' \
-                    | sed 's/,/\./g')
-                echo -e "  Avg. Prov. time : ${R}$avg${NONE} ms"
-                ;;
-            "uzi-pool")
-                echo -e "  Found shares    : ${R}$(nl "Share found by:")${NONE} (in last 10m)"
-                echo -e "  Found Solutions : ${R}$(nl "Solution found")${NONE} (in last 10m)"
-                ;;
-            "uzi-miner")
-                echo -e "  Found Shares : ${R}$(nl "Solution found")${NONE} (in last 10m)"
-                ;;
-            -*)
-                _unknown_option "$1"
-                exit 1
-                ;;
-            *)
-        esac
-    fi
+    check_a summary "$a" && return
+    ! service_is_active "$a" && { return; }
+    
+    local heal; heal=$(health "$a")
+    local since; since=$(get_since "$a")
+    local runtime; runtime=$(get_runtime "$a")
+    [ "$heal" == "Good" ] && sign="${CHECK}" || sign="${CROSS}"
+    ylw "$a:\n"
+    echo -e "  Status          : ${EG}$heal${sign}${NONE}"
+    echo -e "  Started at      : ${M}$since${NONE}"
+    echo -e "  Running for     : ${EW}$runtime${NONE}"
+    local content
+    content=$(journalctl -q -o short-iso-precise --since \
+            "10min ago" --user-unit=ziesha@"$a")
+    nl () { echo "$content" | grep "$1" | wc -l; }
+    case $a in
+        "bazuka")
+            ret=$(echo "$content" | grep "Height" | grep "Outdated" | \
+                tail -n 1 | awk -F ' ' '{print $5}')
+            echo -e "  Current Height  : ${R}$ret${NONE}"
+            ;;
+        "zoro")
+            content=$(journalctl -q -o short-iso-precise --since \
+                    "30min ago" --user-unit=ziesha@"$a")
+            ret=$(echo "$content" | grep "Proving took:" | \
+                awk -F ' ' '{print $NF}' | sed 's/ms//g')
+            avg=$(echo "$ret" | awk '{ total += $1 } END { print total/NR }' \
+                | sed 's/,/\./g')
+            echo -e "  Avg. Prov. time : ${R}$avg${NONE} ms"
+            ;;
+        "uzi-pool")
+            echo -e "  Found shares    : ${R}$(nl "Share found by:")${NONE} (in last 10m)"
+            echo -e "  Found Solutions : ${R}$(nl "Solution found")${NONE} (in last 10m)"
+            ;;
+        "uzi-miner")
+            echo -e "  Found Shares : ${R}$(nl "Solution found")${NONE} (in last 10m)"
+            ;;
+        -*)
+            _unknown_option "$1"
+            exit 1
+            ;;
+        *)
+    esac
 }
 
 # -------------------------------------------------------------
