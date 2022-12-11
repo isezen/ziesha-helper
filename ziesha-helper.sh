@@ -400,7 +400,7 @@ remove_me () {
             echo "$s"
             # service_is_active "$s" && service disable "$s"
         done
-        [-f "$SYSTEMD_PATH/ziesha@.service" ] && rm "$SYSTEMD_PATH/ziesha@.service"
+        [ -f "$SYSTEMD_PATH/ziesha@.service" ] && rm "$SYSTEMD_PATH/ziesha@.service"
         rm -rf "$ZIESHA_HELPER_PATH"
         rm "$HOME/.local/bin/ziesha"
         msg_info "Ziesha removed from your system! :("
