@@ -59,6 +59,10 @@ source_script () {
 }
 source_script "ziesha-common.sh"
 source_script "ziesha-usage.sh"
+[ ! -f "$ZIESHA_HELPER_PATH/AUTHOR" ] &&
+    curl -s -o "$ZIESHA_HELPER_PATH/AUTHOR" "$ZIESHA_URL/AUTHOR"
+[ ! -f "$ZIESHA_HELPER_PATH/VERSION" ] &&
+    curl -s -o "$ZIESHA_HELPER_PATH/VERSION" "$ZIESHA_URL/VERSION"
 [ -f "$ZIESHA_SETTINGS" ] && source "$ZIESHA_SETTINGS"
 # shellcheck source=~/.profile
 source "$PROFILE"
