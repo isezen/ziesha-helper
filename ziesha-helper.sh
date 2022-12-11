@@ -102,7 +102,10 @@ remote () {
 }
 
 # Add variable to setting file
-a2set () { rff "$1" "$ZIESHA_SETTINGS"; a2f "$1=\"$2\"" "$ZIESHA_SETTINGS"; }
+a2set () {
+    [ ! -f "$ZIESHA_SETTINGS" ] && touch "$ZIESHA_SETTINGS"
+    rff "$1" "$ZIESHA_SETTINGS"; a2f "$1=\"$2\"" "$ZIESHA_SETTINGS"
+}
 
 # Get version of specified app
 # Usage Examples:
@@ -587,10 +590,10 @@ set_var () {
     for k in "${!vars[@]}"; do
         [ "$k" = "NETWORK" ] &&
         sed -i "s/network:.*/network: ${vars[$k]}/g" "$HOME/.bazuka.yaml" ||
-        { rfp "$k"; a2p "export $k=\"${vars[$k]}\""; }
+        { a2set "$k" "${vars[$k]}"; }
         msg_info "$k is set to ${vars[$k]}"; echo -e ''
     done
-    source "$PROFILE"
+    source "$ZIESHA_SETTINGS"
     tool=( "$(printf "%s\n" "${tool[@]}" | sort | uniq)" )
     for t in "${tool[@]}"; do
         msg_warn "$(printf "You must restart %s for the changes to take effect." "$t")"
@@ -831,7 +834,7 @@ summary () {
     found () {
         printf "%-18s" "  Found $1s"; echo -n ": "
         printf "${R}%4s${NONE}" "$(nl "${2-$1} found by:")";
-        echo -e " (in last 10m)"; 
+        echo -e " (in last ${time})"; 
     }
     case $a in
         "bazuka")
