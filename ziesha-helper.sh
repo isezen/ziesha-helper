@@ -54,7 +54,8 @@ EOF
 source_script () {
     [ ! -f "$ZIESHA_HELPER_PATH/$1" ] && 
         curl -s -o "$ZIESHA_HELPER_PATH/$1" "$ZIESHA_URL/$1"
-    [ -f "$ZIESHA_HELPER_PATH/$1" ] && source "$ZIESHA_HELPER_PATH/$1"
+    [ -f "$ZIESHA_HELPER_PATH/$1" ] && source "$ZIESHA_HELPER_PATH/$1" ||
+    echo "$1 does not exist"
 }
 source_script "ziesha-common.sh"
 source_script "ziesha-usage.sh"
