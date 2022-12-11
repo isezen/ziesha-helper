@@ -140,7 +140,7 @@ rff () {
 
 # Add a text to bash profile file if it does not exist
 # Default text is $HOME/.local/bin
-a2p () { a2f "${1:-'export PATH="$PATH:$HOME/.local/bin"'}" "$PROFILE"; }
+a2p () { a2f "${1:-'export PATH=\"\$PATH:\$HOME/.local/bin\"'}" "$PROFILE"; }
 
 # Remove variable from bash profile file
 rfp () { rff "export $1" "$PROFILE"; }
