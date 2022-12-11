@@ -409,6 +409,7 @@ remove_me () {
                  VERSION AUTHOR; do
             rm "$ZIESHA_HELPER_PATH/$f"
         done
+         [ ! "$(ls -A "$ZIESHA_HELPER_PATH")" ] && rm -rf "$ZIESHA_HELPER_PATH"
         # rm -rf "$ZIESHA_HELPER_PATH"
         rm "$HOME/.local/bin/ziesha"
         msg_info "Ziesha removed from your system! :("
