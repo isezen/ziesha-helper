@@ -780,19 +780,14 @@ get_runtime () {
 }
 
 status () {
-    local bin
-    local content
-    local installed_apps
-    local a=${1:-bazuka}; shift
-
+    local a=${1:-bazuka}
     if ! check_a status "$a"; then
         ! service_is_active "$a" && { return; }
         local heal; heal=$(health "$a")
-        if [ "$heal" == "Good" ]; then sign="${CHECK}"; else sign="${CROSS}"; fi
-        ylw "$a : "; echo -e "${EG}$heal${sign}${NONE}"
+        [ "$heal" == "Good" ] && sign="${CHECK}" || sign="${CROSS}"
+        printf "%-9s" "$a"; ylw ": "; echo -e "${EG}$heal${sign}${NONE}"
     fi
 }
-
 
 summary () {
     local bin
