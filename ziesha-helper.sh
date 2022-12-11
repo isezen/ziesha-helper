@@ -6,10 +6,11 @@
 # - download, make executable and run script:
 #   $ wget -qO ~/.local/bin/ziesha https://raw.githubusercontent.com/isezen/ziesha-helper/main/ziesha && chmod +x ~/.local/bin/ziesha
 
-ZIESHA_PATH=$HOME/.local/ziesha
-ZIESHA_HELPER_PATH=$ZIESHA_PATH/ziesha-helper
-ZORO_PATH=$ZIESHA_PATH/zoro-dat
-SYSTEMD_PATH=$HOME/.config/systemd/user
+ZIESHA_PATH="$HOME/.local/ziesha"
+ZIESHA_HELPER_PATH="$ZIESHA_PATH/ziesha-helper"
+ZORO_PATH="$ZIESHA_PATH/zoro-dat"
+SYSTEMD_PATH="$HOME/.config/systemd/user"
+ZIESHA_SETTINGS="$HOME/.ziesha.settings"
 BOOTSTRAP="--bootstrap 65.108.193.133:8765"
 # -------------------------------------------------------------
 GITUSR="ziesha-network"
@@ -57,7 +58,7 @@ source_script () {
 }
 source_script "ziesha-common.sh"
 source_script "ziesha-usage.sh"
-[ -f "$HOME/.ziesha.settings" ] && source "$HOME/.ziesha.settings"
+[ -f "$ZIESHA_SETTINGS" ] && source "$ZIESHA_SETTINGS"
 # shellcheck source=~/.profile
 source "$PROFILE"
 
@@ -100,6 +101,9 @@ remote () {
     curl -s "$address"
 }
 
+# Add variable to setting file
+a2set () { rff "$1" "$ZIESHA_SETTINGS"; a2f "$1=\"$2\"" "$ZIESHA_SETTINGS"; }
+
 # Get version of specified app
 # Usage Examples:
 #   version remote bazuka
@@ -122,7 +126,20 @@ version () {
         ret=$(grep -i "^version = " "$ZIESHA_HELPER_PATH/VERSION") ||
         ret=$([ -z "$(which "$a")" ] && echo 'NOTSET' || echo "$($a --version)")
     else
-        ret=$(remote "$a" | grep -i "^version = ")
+        file="$HOME/.cache/$a.cache"
+        if [ -f "$file" ]; then
+            local cur_time; cur_time=$(date +%s)
+            local file_time; file_time=$(stat -c "%Y" "$file")
+            if [ $((cur_time - file_time)) -gt $UPDATE_INTERVAL ]; then
+                ret=$(remote "$a" | grep -i "^version = ")
+                echo "$ret" > "$file"
+            else
+                ret=$(grep -i "^version = " "$file")
+            fi
+        else
+            ret=$(remote "$a" | grep -i "^version = ")
+            echo "$ret" > "$file"
+        fi
     fi
     echo "$ret" | tail -n 1 | awk '{print $NF}' | tr -d '"'
 }
@@ -330,6 +347,9 @@ install_app () {
     echo -e ''
 }
 
+# Check need update
+need_update () { [ "$(version local "$1")" != "$(version remote "$1")" ]; }
+
 # Update given Ziesha app or rust
 update_app () {
     local vc; local vr;
@@ -343,10 +363,8 @@ update_app () {
     check_rust_installed
     if ! check_a update_app "$a"; then
         if is_installed "$a"; then
-            vc=$(version local "$a")
-            vr=$(version remote "$a")
             now=$(date)
-            if [ "$vc" != "$vr" ]; then
+            if need_update "$a"; then
                 cd "$ZIESHA_PATH/$a" || return
                 msg_warn "Updating $a $vc to $vr"
                 git pull origin >> "$LOG_FILE" 2>&1
@@ -785,7 +803,7 @@ status () {
         ! service_is_active "$a" && { return; }
         local heal; heal=$(health "$a")
         [ "$heal" == "Good" ] && sign="${CHECK}" || sign="${CROSS}"
-        printf "%-9s" "$a"; ylw ": "; echo -e "${EG}$heal${sign}${NONE}"
+        printf "${C}%-9s" "$a"; ylw ": "; echo -e "${EG}$heal${sign}${NONE}"
     fi
 }
 
@@ -798,7 +816,10 @@ summary () {
     local since; since=$(get_since "$a")
     local runtime; runtime=$(get_runtime "$a")
     [ "$heal" == "Good" ] && sign="${CHECK}" || sign="${CROSS}"
-    ylw "$a:\n"
+    vl=$(version local "$a"); vr=$(version remote "$a")
+    cyn "$a v$vl:"
+    need_update "$a" && echo -ne " ${EY}(New version v$vr)${NONE}"
+    echo
     echo -e "  Status          : ${EG}$heal${sign}${NONE}"
     echo -e "  Started at      : ${M}$since${NONE}"
     echo -e "  Running for     : ${EW}$runtime${NONE}"
@@ -806,6 +827,7 @@ summary () {
     content=$(journalctl -q -o short-iso-precise --since \
             "10min ago" --user-unit=ziesha@"$a")
     nl () { echo "$content" | grep "$1" | wc -l; }
+    found () { echo -e "  Found $1s    : ${R}$(nl "${2-$1} found by:")${NONE} (in last 10m)"; }
     case $a in
         "bazuka")
             ret=$(echo "$content" | grep "Height" | grep "Outdated" | \
@@ -822,11 +844,14 @@ summary () {
             echo -e "  Avg. Prov. time : ${R}$avg${NONE} ms"
             ;;
         "uzi-pool")
-            echo -e "  Found shares    : ${R}$(nl "Share found by:")${NONE} (in last 10m)"
-            echo -e "  Found Solutions : ${R}$(nl "Solution found")${NONE} (in last 10m)"
+            found "Share"
+            found "Solution"
+            # echo -e "  Found shares    : ${R}$(nl "Share found by:")${NONE} (in last 10m)"
+            # echo -e "  Found Solutions : ${R}$(nl "Solution found")${NONE} (in last 10m)"
             ;;
         "uzi-miner")
-            echo -e "  Found Shares : ${R}$(nl "Solution found")${NONE} (in last 10m)"
+            found "Share" "Solution"
+            # echo -e "  Found Shares : ${R}$(nl "Solution found")${NONE} (in last 10m)"
             ;;
         -*)
             _unknown_option "$1"
