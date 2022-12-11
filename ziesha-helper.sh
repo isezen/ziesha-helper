@@ -809,6 +809,7 @@ status () {
 
 summary () {
     local a=${1:-bazuka}; shift
+    local time=${1:-"10m"}
     check_a summary "$a" && return
     ! service_is_active "$a" && { return; }
 
@@ -825,7 +826,7 @@ summary () {
     echo -e "  Running for     : ${EW}$runtime${NONE}"
     local content
     content=$(journalctl -q -o short-iso-precise --since \
-            "10min ago" --user-unit=ziesha@"$a")
+            "$time ago" --user-unit=ziesha@"$a")
     nl () { echo "$content" | grep "$1" | wc -l; }
     found () {
         printf "%-18s" "  Found $1s"; echo -n ": "
@@ -840,7 +841,7 @@ summary () {
             ;;
         "zoro")
             content=$(journalctl -q -o short-iso-precise --since \
-                    "30min ago" --user-unit=ziesha@"$a")
+                    "$time ago" --user-unit=ziesha@"$a")
             ret=$(echo "$content" | grep "Proving took:" | \
                 awk -F ' ' '{print $NF}' | sed 's/ms//g')
             avg=$(echo "$ret" | awk '{ total += $1 } END { print total/NR }' \
@@ -850,12 +851,12 @@ summary () {
         "uzi-pool")
             found "Share"
             found "Solution"
-            # echo -e "  Found shares    : ${R}$(nl "Share found by:")${NONE} (in last 10m)"
-            # echo -e "  Found Solutions : ${R}$(nl "Solution found")${NONE} (in last 10m)"
+            # echo -e "  Found shares    : ${R}$(nl "Share found by:")${NONE} (in last $time)"
+            # echo -e "  Found Solutions : ${R}$(nl "Solution found")${NONE} (in last $time)"
             ;;
         "uzi-miner")
             found "Share" "Solution"
-            # echo -e "  Found Shares : ${R}$(nl "Solution found")${NONE} (in last 10m)"
+            # echo -e "  Found Shares : ${R}$(nl "Solution found")${NONE} (in last $time)"
             ;;
         -*)
             _unknown_option "$1"
