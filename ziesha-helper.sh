@@ -827,7 +827,9 @@ summary () {
     content=$(journalctl -q -o short-iso-precise --since \
             "10min ago" --user-unit=ziesha@"$a")
     nl () { echo "$content" | grep "$1" | wc -l; }
-    found () { echo -e "  Found $1s    : ${R}$(nl "${2-$1} found by:")${NONE} (in last 10m)"; }
+    found () {
+        printf "%-17s" "  Found $1s";
+        echo -e ": ${R}$(nl "${2-$1} found by:")${NONE} (in last 10m)"; }
     case $a in
         "bazuka")
             ret=$(echo "$content" | grep "Height" | grep "Outdated" | \
