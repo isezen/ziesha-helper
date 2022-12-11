@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# shellcheck disable=1090,1091,2034,2059
+# shellcheck disable=1090,1091,2015,2034,2059
 #
 # Manage Ziesha-network infrastructure.
 #
@@ -134,9 +134,6 @@ get_bin_loc () { which "${1:-bazuka}"; }
 # Check if app is installed
 is_installed () { [[ -n "$(get_bin_loc "${1:-bazuka}")" ]]; }
 
-# Check if a Ziesha service is active or not
-service_is_active () { systemctl --user is-active --quiet ziesha@"$1"; }
-
 # Get installed tools
 get_installed_tools () {
     local ret=
@@ -184,6 +181,9 @@ get_running_services () {
     fi
     echo "$services"
 }
+
+# Check if a Ziesha service is active or not
+service_is_active () { systemctl --user is-active --quiet ziesha@"$1"; }
 
 # Start/stop/restart/enable/disable a Ziesha service
 service () {
@@ -273,17 +273,14 @@ check_a () {
     [ "$a" = "all" ] && a=$APPS
     if [[ "$a" = *" "* ]]; then
         for i in $a; do
-            if ! contains "$APPS" "$i"; then
-                msg_err "$i is not a Ziesha tool. ('$APPS')"
-                exit 1
-            fi
+            ! contains "$APPS" "$i" &&
+            { msg_err "$i is not a Ziesha tool. ('$APPS')"; return 1; }
             $func "$i"
         done
         return 0
     else
-        if ! contains "$APPS" "$a"; then
-            msg_err "$a is not a Ziesha tool. ('$APPS')"
-        fi
+        ! contains "$APPS" "$a" && 
+        { msg_err "$a is not a Ziesha tool. ('$APPS')"; return 0; }
     fi
     return 1
 }
@@ -425,10 +422,8 @@ show_log () {
     local short=true
     local timestamp=false
     local a=${1:-bazuka}; shift
-    if ! contains "$APPS auto-update" "$a"; then
-        msg_err "$a is not a Ziesha tool. ('$APPS')"
-        exit 1
-    fi
+    ! contains "$APPS" "$a" && 
+    { msg_err "$a is not a Ziesha tool. ('$APPS')"; echo -e ''; exit 1; }
 
     if ([ "$a" = "auto-update" ] || is_installed "$a"); then
         while [[ $# -gt 0 ]]; do
@@ -730,8 +725,114 @@ download () {
     curl -o "$file" "$url"
 }
 
-status () {
+# Health of running service
+# return Good if service is active and running normally
+# otherwise return Bad
+# Args:
+#   $1: Name of service
+#   $2: If set to '-q', it will return True/False quietly.
+health () {
+    local since="10min ago"
+    local ret="inactive"
+    local a=${1:-bazuka}; shift
+    local quiet=$1
+    if service_is_active "$a"; then
+        local content
+        content=$(journalctl -q -o short-iso-precise --since \
+                "$since" --user-unit=ziesha@"$a")
+        is_in () { echo "$content" | grep -q "$1"; }
+        case $a in
+            "bazuka")
+                ret=$(echo "$content" | grep "Height" | grep "Outdated" | \
+                    awk -F ' ' '{print $5}' | sort -n | uniq)
+                [ -n "$ret" ] && ret="Good" || ret="Bad"
+                ;;
+            "zoro")
+                is_in "Proving took:" && ret="Good" || ret="Bad" ;;
+            "uzi-pool")
+                is_in "Share found by:" && ret="Good" || ret="Bad" ;;
+            "uzi-miner")
+                is_in "Solution found" && ret="Good" || ret="Bad" ;;
+            -*)
+                _unknown_option "$1" ;;
+            *)
+        esac
+    fi
+    [ -z "$quiet" ] && echo "$ret" || [ "$ret" = "Good" ]
+}
 
+# Return date part of systemctl status command
+get_since () {
+    local a=${1:-bazuka}
+    local content
+    content=$(systemctl --user status ziesha@"$a" | grep "Active:")
+    content="${content#*since }"
+    echo "${content%%;*}"
+}
+
+# Return run-time part of systemctl status command
+get_runtime () {
+    local a=${1:-bazuka}
+    local content
+    content=$(systemctl --user status ziesha@"$a" | grep "Active:")
+    content="${content##*; }"
+    echo "${content%% *}"
+}
+
+status () {
+    local bin
+    local content
+    local installed_apps
+    local a=${1:-bazuka}; shift
+
+    # ! contains "$APPS" "$a" && 
+    # { msg_err "$a is not a Ziesha tool. ('$APPS')"; echo -e ''; return; }
+    # ! is_installed "$a" &&
+    # { msg_err "$a is NOT installed. Run 'ziesha install $a'."; 
+    #   echo -e ''; exit 0; }
+    if ! check_a status "$a"; then
+        ! service_is_active "$a" && { msg_warn "$a is not running."; echo; return; }
+        
+        local heal; heal=$(health "$a")
+        local since; since=$(get_since "$a")
+        local runtime; runtime=$(get_runtime "$a")
+        if [ "$heal" == "Good" ]; then sign="${CHECK}"; else sign="${CROSS}"; fi
+        ylw "$a:\n"
+        echo -e "  Status          : ${EG}$heal${sign}${NONE}"
+        echo -e "  Started at      : ${M}$since${NONE}"
+        echo -e "  Running for     : ${EW}$runtime${NONE}"
+        content=$(journalctl -q -o short-iso-precise --since \
+                "10min ago" --user-unit=ziesha@"$a")
+        nl () { echo "$content" | grep "$1" | wc -l; }
+        case $a in
+            "bazuka")
+                ret=$(echo "$content" | grep "Height" | grep "Outdated" | \
+                    tail -n 1 | awk -F ' ' '{print $5}')
+                echo -e "  Current Height  : ${R}$ret${NONE}"
+                ;;
+            "zoro")
+                content=$(journalctl -q -o short-iso-precise --since \
+                        "30min ago" --user-unit=ziesha@"$a")
+                ret=$(echo "$content" | grep "Proving took:" | \
+                    awk -F ' ' '{print $NF}' | sed 's/ms//g')
+                avg=$(echo "$ret" | awk '{ total += $1 } END { print total/NR }' \
+                    | sed 's/,/\./g')
+                echo -e "  Avg. Prov. time : ${R}$avg${NONE} ms"
+                ;;
+            "uzi-pool")
+                echo -e "  Found shares    : ${R}$(nl "Share found by:")${NONE} (in last 10m)"
+                echo -e "  Found Solutions : ${R}$(nl "Solution found")${NONE} (in last 10m)"
+                ;;
+            "uzi-miner")
+                echo -e "  Found Shares : ${R}$(nl "Solution found")${NONE} (in last 10m)"
+                ;;
+            -*)
+                _unknown_option "$1"
+                exit 1
+                ;;
+            *)
+        esac
+    fi
 }
 
 # -------------------------------------------------------------
