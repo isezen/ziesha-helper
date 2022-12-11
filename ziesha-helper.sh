@@ -401,6 +401,10 @@ remove_me () {
             service_is_active "$s" && service disable "$s"
         done
         [ -f "$SYSTEMD_PATH/ziesha@.service" ] && rm "$SYSTEMD_PATH/ziesha@.service"
+        for f in ziesha-helper.sh ziesha-common.sh ziesha-usage.sh \
+                 VERSION AUTHOR; do
+            rm "$ZIESHA_HELPER_PATH/$f"
+        done
         # rm -rf "$ZIESHA_HELPER_PATH"
         rm "$HOME/.local/bin/ziesha"
         msg_info "Ziesha removed from your system! :("
