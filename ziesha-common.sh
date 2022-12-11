@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=1090,1091,2015,2034,2059
 #
 # Common functions to use in other installation scripts.
 #
@@ -101,19 +102,19 @@ get_os_arch () {
 
 # A modified lsb_release wrapper.
 lsb_releasef () {
-    echo $(lsb_release $1 | \
-           awk 'BEGIN{FS=":"} {print $2}' | \
-           awk '{$1=$1};1')
+    echo "$(lsb_release "$1" | \
+            awk 'BEGIN{FS=":"} {print $2}' | \
+            awk '{$1=$1};1')"
 }
 
 # Return name of linux distribution
 get_linux_dist () {
-    [ "$(get_os)" = "linux" ] && echo $(lsb_releasef -i) || echo $(get_os)
+    [ "$(get_os)" = "linux" ] && echo "$(lsb_releasef -i)" || echo "$(get_os)"
 }
 
 # Return version if dist is Ubuntu
 get_ubuntu_ver () {
-    [ "$(get_linux_dist)" = "Ubuntu" ] && echo $(lsb_releasef -r)
+    [ "$(get_linux_dist)" = "Ubuntu" ] && echo "$(lsb_releasef -r)"
 }
 
 # String to lowercase
@@ -122,24 +123,27 @@ tolower () { echo "$1" | awk '{print tolower($0)}'; }
 # String to uppercase
 toupper () { echo "$1" | awk '{print toupper($0)}'; }
 
-# Add a text to bash profile file if it does not exist
-# Default text is $HOME/.local/bin
-a2p () {
-    local exp=${1:-'export PATH="$PATH:$HOME/.local/bin"'}
-    exist=$(grep "$exp" $PROFILE)
-    if [ -z "$exist" ]; then
-        echo -e "$exp" >> $PROFILE
-    fi
-    source $PROFILE
+# Add a text to a specified file
+a2f () {
+    local exp=$1; local f=$2
+    local exist; exist=$(grep "$exp" "$f")
+    [ -z "$exist" ] && echo -e "$exp" >> "$f"
+    source "$f"
 }
 
-# Remove variable from bash profile file
-rfp () {
-    pat="^export $1*"
-    [ -n "$(grep "$pat" $PROFILE)" ] && 
-    grep -v "$pat" $PROFILE > $PROFILE.tmp && 
-    mv $PROFILE.tmp $PROFILE
+# Remove text from specified file
+rff () {
+    grep -q "^$1*" "$2" && 
+    grep -v "^$1*" "$2" > "$2.tmp" && 
+    mv "$2.tmp" "$2"
 }
+
+# Add a text to bash profile file if it does not exist
+# Default text is $HOME/.local/bin
+a2p () { a2f "${1:-'export PATH="$PATH:$HOME/.local/bin"'}" "$PROFILE"; }
+
+# Remove variable from bash profile file
+rfp () { rff "export $1" "$PROFILE"; }
 
 # Get a password from $USER
 get_pass () {
