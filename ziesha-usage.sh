@@ -329,3 +329,30 @@ function _usage_service () {
 
 EOF
 }
+
+# Print usage for run command
+function _usage_status () {
+  _version
+  cat<<EOF
+
+  $DESCRIPTION
+    Show $1 of Ziesha tool(s).
+
+  $OPTIONS
+    -h | --help : Shows this message
+
+  $COMMANDS
+    bazuka    : Show $1 of bazuka
+    uzi-miner : Show $1 of uzi-miner
+    uzi-pool  : Show $1 of uzi-pool
+    zoro      : Show $1 of zoro
+    all       : Show $1 of all running tools
+
+  $USAGE[0;49;96m
+    $ $EXE $1 bazuka
+    $ $EXE $1 bazuka zoro
+    $ $EXE $1 uzi-miner
+    $ $EXE $1 all
+
+EOF
+}

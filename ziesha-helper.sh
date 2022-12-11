@@ -785,13 +785,28 @@ status () {
     local installed_apps
     local a=${1:-bazuka}; shift
 
+    if ! check_a status "$a"; then
+        ! service_is_active "$a" && { return; }
+        local heal; heal=$(health "$a")
+        if [ "$heal" == "Good" ]; then sign="${CHECK}"; else sign="${CROSS}"; fi
+        ylw "$a : "; echo -e "${EG}$heal${sign}${NONE}"
+    fi
+}
+
+
+summary () {
+    local bin
+    local content
+    local installed_apps
+    local a=${1:-bazuka}; shift
+
     # ! contains "$APPS" "$a" && 
     # { msg_err "$a is not a Ziesha tool. ('$APPS')"; echo -e ''; return; }
     # ! is_installed "$a" &&
     # { msg_err "$a is NOT installed. Run 'ziesha install $a'."; 
     #   echo -e ''; exit 0; }
-    if ! check_a status "$a"; then
-        ! service_is_active "$a" && { msg_warn "$a is not running."; echo; return; }
+    if ! check_a summary "$a"; then
+        ! service_is_active "$a" && { return; }
         
         local heal; heal=$(health "$a")
         local since; since=$(get_since "$a")
@@ -860,6 +875,8 @@ function show_help () {
             _usage_reset ;;
         start|stop|restart)
             _usage_service "$1" ;;
+        status|summary)
+            _usage_status "$1" ;;
         -*)
             _unknown_option "$1"; exit 1 ;;
         *)
@@ -882,7 +899,8 @@ OPTS=( "-i|install|install_app"
        "|start|start" 
        "|stop|stop" 
        "|restart|restart"
-       "|status|status" )
+       "|status|status"
+       "|summary|summary" )
 
 
 get_func () {
