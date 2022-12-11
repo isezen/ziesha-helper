@@ -829,7 +829,7 @@ summary () {
     nl () { echo "$content" | grep "$1" | wc -l; }
     found () {
         printf "%-18s" "  Found $1s"; echo -n ": "
-        printf "${R}%-4s${NONE}" "$(nl "${2-$1} found by:")";
+        printf "${R}%4s${NONE}" "$(nl "${2-$1} found by:")";
         echo -e " (in last 10m)"; 
     }
     case $a in
