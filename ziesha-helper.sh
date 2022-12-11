@@ -811,7 +811,7 @@ summary () {
     local a=${1:-bazuka}; shift
     check_a summary "$a" && return
     ! service_is_active "$a" && { return; }
-    
+
     local heal; heal=$(health "$a")
     local since; since=$(get_since "$a")
     local runtime; runtime=$(get_runtime "$a")
@@ -828,7 +828,7 @@ summary () {
             "10min ago" --user-unit=ziesha@"$a")
     nl () { echo "$content" | grep "$1" | wc -l; }
     found () {
-        printf "%-18s" "  Found $1s"; echo -e ": "
+        printf "%-18s" "  Found $1s"; echo -n ": "
         printf "${R}%-4s${NONE}" "$(nl "${2-$1} found by:")";
         echo -e " (in last 10m)"; 
     }
