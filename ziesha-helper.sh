@@ -29,7 +29,7 @@ LOG_FILE="$HOME/.ziesha.log"
 service_ziesha=$(cat <<EOF
 # Path: $SYSTEMD_PATH/ziesha@.service
 [Unit]
-Description=Ziesha Daemon
+Description=Ziesha %i Daemon
 After=network-online.target
 
 [Service]
@@ -37,6 +37,8 @@ Type=simple
 WorkingDirectory=$HOME
 Environment="RUST_BACKTRACE=full"
 ExecStart=$HOME/.local/bin/ziesha run %i
+LimitNOFILE=50000
+LimitNOFILESoft=50000
 Restart=always
 RestartSec=3
 
@@ -253,6 +255,15 @@ service () {
             _unknown_option "$status"; exit 1 ;;
     esac
 }
+
+# Start a Ziesha service
+start () { service start "$1"; }
+
+# Stop a Ziesha service
+stop () { service stop "$1"; }
+
+# Restart a Ziesha service
+restart () { service restart "$1"; }
 
 # Check variable if it is a Ziesha tool or not
 # if so, run specified function
@@ -719,14 +730,9 @@ download () {
     curl -o "$file" "$url"
 }
 
-# Start a Ziesha service
-start () { service start "$1"; }
+status () {
 
-# Stop a Ziesha service
-stop () { service stop "$1"; }
-
-# Restart a Ziesha service
-restart () { service restart "$1"; }
+}
 
 # -------------------------------------------------------------
 # MAIN
@@ -774,7 +780,8 @@ OPTS=( "-i|install|install_app"
        "|reset|reset_bazuka" 
        "|start|start" 
        "|stop|stop" 
-       "|restart|restart" )
+       "|restart|restart"
+       "|status|status" )
 
 
 get_func () {
