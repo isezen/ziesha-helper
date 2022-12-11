@@ -55,6 +55,8 @@ function _usage_main () {
     start      : Start a service
     stop       : Stop a service
     restart    : Restart a service
+    status     : Show status
+    summary    : Show summary
 
   $USAGE
     [0;49;96m$ $EXE install bazuka
