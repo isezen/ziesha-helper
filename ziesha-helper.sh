@@ -308,7 +308,7 @@ check_a () {
 # Install/update ziesha-helper
 install_me () {
     mkdir -p "$HOME/.local/bin" && a2p
-    mkdir -p "$ZIESHA_PATH" && {
+    mkdir -p "$ZIESHA_HELPER_PATH" && {
         for f in ziesha-helper.sh ziesha-common.sh ziesha-usage.sh \
                  VERSION AUTHOR; do
             curl -s -o "$ZIESHA_HELPER_PATH/$f" "$ZIESHA_URL/$f"
