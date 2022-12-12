@@ -2,6 +2,9 @@
 # shellcheck disable=1090
 # Ziesha Runner
 #
+# To Install Ziesha, run:
+#  $ curl -s https://raw.githubusercontent.com/isezen/ziesha-helper/main/ziesha | bash && . ~/.profile
+#
 file="$HOME/.local/ziesha/ziesha-helper/ziesha-helper.sh"
 [ -f "$file" ] && source "$file" || {
     bash <(curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/isezen/ziesha-helper/main/ziesha-helper.sh) install me

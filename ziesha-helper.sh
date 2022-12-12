@@ -4,7 +4,7 @@
 # Manage Ziesha-network infrastructure.
 #
 # - Run the command below:
-#   $ curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/isezen/ziesha-helper/main/ziesha | bash -s install me
+#   $ curl -s https://raw.githubusercontent.com/isezen/ziesha-helper/main/ziesha | bash && . ~/.profile
 
 ZIESHA_PATH="$HOME/.local/ziesha"
 ZIESHA_HELPER_PATH="$ZIESHA_PATH/ziesha-helper"
