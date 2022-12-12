@@ -50,6 +50,7 @@ EOF
 # -------------------------------------------------------------
 # SOURCING
 # Download and source a remote script
+[ ! -d "$ZIESHA_HELPER_PATH" ] && mkdir -p "$ZIESHA_HELPER_PATH"
 source_script () {
     [ ! -f "$ZIESHA_HELPER_PATH/$1" ] && 
         { curl -s -o "$ZIESHA_HELPER_PATH/$1" "$ZIESHA_URL/$1";
