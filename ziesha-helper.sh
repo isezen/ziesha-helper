@@ -39,7 +39,6 @@ WorkingDirectory=$HOME
 Environment="RUST_BACKTRACE=full"
 ExecStart=$HOME/.local/bin/ziesha run %i
 LimitNOFILE=50000
-LimitNOFILESoft=50000
 Restart=always
 RestartSec=3
 
@@ -325,7 +324,11 @@ install_me () {
 
 # Install given Ziesha app
 install_app () {
-    local a=${@:-bazuka}
+    local a=$*
+    if [ -z "$a" ]; then
+        is_yes "Are you sure to install all Ziesha tools?" &&  a="all" || return 0
+    fi
+    a=${*:-bazuka}
     if [ "$a" = "rust" ]; then
         rust_is_installed && msg_warn "$a is already installed." || install_rust
         echo -e ''
@@ -821,7 +824,7 @@ status () {
 }
 
 summary () {
-    local a=${1:-bazuka}; shift
+    local a=${1:-"all"}; shift
     local time=${1:-"10m"}
     check_a summary "$a" && return
     ! service_is_active "$a" && { return; }
@@ -879,6 +882,16 @@ summary () {
     esac
 }
 
+list () {
+    local t; t=$(get_installed_tools)
+    for i in $t; do
+        vl=$(version local "$i")
+        msg_info "$i v$vl"
+        service_is_active "$i" && { echo -ne " - "; ylw "Running"; }
+        echo;
+    done
+}
+
 # -------------------------------------------------------------
 # MAIN
 
@@ -906,6 +919,8 @@ function show_help () {
             _usage_service "$1" ;;
         status|summary)
             _usage_status "$1" ;;
+        list)
+            _usage_list ;;
         -*)
             _unknown_option "$1"; exit 1 ;;
         *)
@@ -921,6 +936,7 @@ OPTS=( "-i|install|install_app"
        "-l|log|show_log" 
        "-s|set|set_var" 
        "-g|get|get_var" 
+       "|list|list" 
        "|download|download" 
        "|init|init_bazuka" 
        "|run|run"
@@ -993,7 +1009,12 @@ while [[ $# -gt 0 ]]; do
             shift ;;
     esac
 done
-set -- "${POSITIONAL_ARGS[@]}" 
 
-[[ -z "${1+x}" ]] && { show_help "$long_opt"; exit 0; }
-$func "${POSITIONAL_ARGS[@]}"
+set -- "${POSITIONAL_ARGS[@]}"
+
+# if [ "$func" != "list" ]; then
+#     [[ -z "${1+x}" ]] && { show_help "$long_opt"; exit 0; }
+# fi
+echo "func: $func"
+[ -n "$func" ] && { $func "${POSITIONAL_ARGS[@]}"; } ||
+    { [[ -z "${1+x}" ]] && { show_help "$long_opt"; exit 0; } }
