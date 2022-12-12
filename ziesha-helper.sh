@@ -415,7 +415,7 @@ remove_me () {
          [ ! "$(ls -A "$ZIESHA_HELPER_PATH")" ] && rm -rf "$ZIESHA_HELPER_PATH"
         # rm -rf "$ZIESHA_HELPER_PATH"
         rm "$HOME/.local/bin/ziesha"
-        msg_info "Ziesha removed from your system! :("
+        msg_info "Ziesha removed from your system! :("; echo
     fi
 }
 
