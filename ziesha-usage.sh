@@ -45,6 +45,7 @@ function _usage_main () {
     install    : Install a Ziesha tool
     update     : Update a Ziesha tool
     remove     : Remove/uninstall a Ziesha tool
+    list       : List installed tools
     log        : Show log of a Ziesha tool
     set        : Set a variable
     get        : Get a variable
@@ -355,6 +356,23 @@ function _usage_status () {
     $ $EXE $1 bazuka zoro
     $ $EXE $1 uzi-miner
     $ $EXE $1 all
+
+EOF
+}
+
+# Print usage for list command
+function _usage_list () {
+  _version
+  cat<<EOF
+
+  $DESCRIPTION
+    Show list of installed Ziesha tool(s).
+
+  $OPTIONS
+    -h | --help : Shows this message
+
+  $USAGE[0;49;96m
+    $ $EXE $1 list
 
 EOF
 }
