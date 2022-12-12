@@ -329,7 +329,6 @@ install_app () {
     if [ -z "$a" ]; then
         is_yes "Are you sure to install all Ziesha tools?" &&  a="all" || return 0
     fi
-    a=${*:-bazuka}
     if [ "$a" = "rust" ]; then
         rust_is_installed && msg_warn "$a is already installed." || install_rust
         echo -e ''
