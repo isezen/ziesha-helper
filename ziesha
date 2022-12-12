@@ -7,6 +7,7 @@
 #
 file="$HOME/.local/ziesha/ziesha-helper/ziesha-helper.sh"
 [ -f "$file" ] && source "$file" || {
-    bash <(curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/isezen/ziesha-helper/main/ziesha-helper.sh) install me
+    source <(curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/isezen/ziesha-helper/main/ziesha-helper.sh)
+    # bash <(curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/isezen/ziesha-helper/main/ziesha-helper.sh) install me
     echo "Ziesha-helper was installed"
 }
