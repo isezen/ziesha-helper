@@ -172,7 +172,7 @@ rust_is_installed () { is_installed "cargo"; }
 # Check if rust is installed and exit if it it is not.
 check_rust_installed () {
     if ! rust_is_installed; then
-        msg_err "Rust is not installed. Run 'ziesha install rust'."
+        msg_err "Rust is not installed. Run 'ziesha install rust'."; echo
         exit 0
     fi
 }
