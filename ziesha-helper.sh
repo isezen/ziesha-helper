@@ -895,7 +895,7 @@ summary () {
             ns="$(nl "Share")"
             local sp=$(echo "scale=3 ; $(nhashes) / $SHARE_EASINESS" | bc)
             local hr=$(echo "scale=3 ; $ns * $sp / 600" | bc)
-            echo "$hs"
+            echo "$hr"
             ;;
         "uzi-miner")
             found "Share" "Solution"
