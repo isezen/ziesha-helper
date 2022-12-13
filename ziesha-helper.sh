@@ -779,6 +779,7 @@ health () {
             "bazuka")
                 ret=$(echo "$content" | grep "Height" | grep "Outdated" | \
                     awk -F ' ' '{print $5}' | sort -n | uniq)
+                # echo "$ret" | wc -l
                 [ -n "$ret" ] && 
                 { [[ $(echo "$ret" | wc -l) -eq 1 ]] && 
                     ret="Bad" || ret="Good" ;} || ret="Bad"
@@ -820,8 +821,9 @@ status () {
     if ! check_a status "$a"; then
         ! service_is_active "$a" && { return; }
         local heal; heal=$(health "$a")
-        [ "$heal" == "Good" ] && sign="${CHECK}" || sign="${CROSS}"
-        printf "${C}%-9s" "$a"; ylw ": "; echo -e "${EG}$heal${sign}${NONE}"
+        local sign="${CROSS}"; [ "$heal" == "Good" ] && sign="${CHECK}"
+        local col="${ER}"; [ "$heal" == "Good" ] && col="${EG}"
+        printf "${C}%-9s" "$a"; ylw ": "; echo -e "${col}$heal${sign}${NONE}"
     fi
 }
 
@@ -834,12 +836,13 @@ summary () {
     local heal; heal=$(health "$a")
     local since; since=$(get_since "$a")
     local runtime; runtime=$(get_runtime "$a")
-    [ "$heal" == "Good" ] && sign="${CHECK}" || sign="${CROSS}"
+    local sign="\U26D4"; [ "$heal" == "Good" ] && sign="${CHECK}"
+    local col="${ER}"; [ "$heal" == "Good" ] && col="${EG}"
     vl=$(version local "$a"); vr=$(version remote "$a")
     cyn "$a v$vl:"
     need_update "$a" && echo -ne " ${EY}(New version v$vr)${NONE}"
     echo
-    echo -e "  Status          : ${EG}$heal${sign}${NONE}"
+    echo -e "  Status          : ${col}$heal${sign}${NONE}"
     echo -e "  Started at      : ${M}$since${NONE}"
     echo -e "  Running for     : ${EW}$runtime${NONE}"
     local content
@@ -855,7 +858,14 @@ summary () {
         "bazuka")
             ret=$(echo "$content" | grep "Height" | grep "Outdated" | \
                 tail -n 1 | awk -F ' ' '{print $5}')
-            echo -e "  Current Height  : ${R}$ret${NONE}"
+            [ "$heal" == "Good" ] && col="${G}" || col="${R}"
+            [ "$heal" == "Bad" ] && sign="\U203c" || sign=
+            echo -ne "  Current Height  : ${col}$ret ${sign}${NONE}"
+            echo "$content" | grep -q "Height advanced to" &&
+                echo -e "${col}(Syncing)${NONE}"
+            balance=$(bazuka wallet info | grep "Main chain balance:" | \
+                      awk -F ' ' '{print $4}')
+            echo -e "  Balance         : ${col}$balance${NONE}"
             ;;
         "zoro")
             content=$(journalctl -q -o short-iso-precise --since \
