@@ -427,7 +427,7 @@ remove_app () {
     if [ "$a" = "rust" ]; then
         if is_yes "Are you sure to remove rust?"; then
             rustup self uninstall -y
-            msg_info "$a removed from your system :("
+            msg_info "$a removed from your system :("; echo
             return
         fi
     fi
@@ -825,7 +825,7 @@ get_runtime () {
 }
 
 status () {
-    local a=${1:-bazuka}
+    local a=${1:-all}
     if ! check_a status "$a"; then
         ! service_is_active "$a" && { return; }
         local heal; heal=$(health "$a")
@@ -911,6 +911,8 @@ list () {
 
 # -------------------------------------------------------------
 # MAIN
+
+install_deps
 
 function _unknown_option () { echo -n "Unknown option "; red "$1"; echo -e ''; }
 
