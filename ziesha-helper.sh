@@ -378,6 +378,8 @@ update_app () {
             now=$(date)
             if need_update "$a"; then
                 cd "$ZIESHA_PATH/$a" || return
+                vc="$(version local "$a")"
+                vl="$(version remote "$a")"
                 msg_warn "Updating $a $vc to $vr"
                 git pull origin >> "$LOG_FILE" 2>&1
                 source "$CARGO_ENV"
@@ -742,7 +744,8 @@ run () {
 # Download zoro dat files
 download () {
     local file=
-    case $1 in
+    local a=${1:-all}
+    case "$a" in
         update-dat)
             file=$UPDATE_DAT
             url="https://api.rues.info/update.dat" ;;
@@ -751,7 +754,12 @@ download () {
             url="https://api.rues.info/deposit.dat" ;;
         withdraw-dat)
             file=$WITHDRAW_DAT
-            urş="https://api.rues.info/withdraw.dat" ;;
+            url="https://api.rues.info/withdraw.dat" ;;
+        all)
+        download update-dat
+        download deposit-dat
+        download withdraw-dat
+        ;;
         *)
             _unknown_option "$1"; exit 1 ;;
     esac
@@ -859,10 +867,10 @@ summary () {
             ret=$(echo "$content" | grep "Height" | grep "Outdated" | \
                 tail -n 1 | awk -F ' ' '{print $5}')
             [ "$heal" == "Good" ] && col="${G}" || col="${R}"
-            [ "$heal" == "Bad" ] && sign="\U203c" || sign=
-            echo -ne "  Current Height  : ${col}$ret ${sign}${NONE}"
+            [ "$heal" == "Bad" ] && sign=" \U203c" || sign=
+            echo -ne "  Current Height  : ${col}$ret${sign}${NONE}"
             echo "$content" | grep -q "Height advanced to" &&
-                echo -e "${col}(Syncing)${NONE}"
+                echo -e "${col} (Syncing)${NONE}"
             balance=$(bazuka wallet info | grep "Main chain balance:" | \
                       awk -F ' ' '{print $4}')
             echo -e "  Balance         : ${col}$balance${NONE}"
