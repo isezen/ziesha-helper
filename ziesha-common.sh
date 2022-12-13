@@ -215,10 +215,10 @@ install_pkg () {
     local dist=$(get_linux_dist)
     if [ $dist == "Ubuntu" ]; then
         sudo apt update > /dev/null 2>&1
-        sudo apt install $1 -y > /dev/null 2>&1
+        sudo apt install "$1" -y > /dev/null 2>&1
     elif [ $dist == "macos" ]; then
         if [ -f "$(which port)" ]; then
-            sudo port install $1 > /dev/null 2>&1
+            sudo port install "$1" > /dev/null 2>&1
         fi
     else
         col $BGR "Installing dependencies on $dist is not supported."
