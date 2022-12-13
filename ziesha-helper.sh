@@ -779,7 +779,9 @@ health () {
             "bazuka")
                 ret=$(echo "$content" | grep "Height" | grep "Outdated" | \
                     awk -F ' ' '{print $5}' | sort -n | uniq)
-                [ -n "$ret" ] && ret="Good" || ret="Bad"
+                [ -n "$ret" ] && 
+                { [[ $(echo "$ret" | wc -l) -eq 1 ]] && 
+                    ret="Bad" || ret="Good" ;} || ret="Bad"
                 ;;
             "zoro")
                 is_in "Proving took:" && ret="Good" || ret="Bad" ;;
