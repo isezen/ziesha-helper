@@ -243,7 +243,7 @@ install () {
     if test -n "$to_install"; then
         installed=true
         ylw "$header"; echo -e ''
-        install_pkg $to_install
+        install_pkg "$to_install"
     fi
     [ "$installed" = true ] && ylw "$footer"
 }

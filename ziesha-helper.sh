@@ -312,6 +312,7 @@ check_a () {
 
 # Install/update ziesha-helper
 install_me () {
+    install_deps
     mkdir -p "$HOME/.local/bin" && a2p
     mkdir -p "$ZIESHA_HELPER_PATH" && {
         for f in ziesha-helper.sh ziesha-common.sh ziesha-usage.sh \
@@ -911,8 +912,6 @@ list () {
 
 # -------------------------------------------------------------
 # MAIN
-
-install_deps
 
 function _unknown_option () { echo -n "Unknown option "; red "$1"; echo -e ''; }
 
