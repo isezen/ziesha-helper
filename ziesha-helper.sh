@@ -1033,6 +1033,6 @@ set -- "${POSITIONAL_ARGS[@]}"
 # if [ "$func" != "list" ]; then
 #     [[ -z "${1+x}" ]] && { show_help "$long_opt"; exit 0; }
 # fi
-echo "func: $func"
+# echo "func: $func"
 [ -n "$func" ] && { $func "${POSITIONAL_ARGS[@]}"; } ||
     { [[ -z "${1+x}" ]] && { show_help "$long_opt"; exit 0; } }
