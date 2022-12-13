@@ -859,6 +859,10 @@ summary () {
     local content
     content=$(journalctl -q -o short-iso-precise --since \
             "$time ago" --user-unit=ziesha@"$a")
+    nhashes () {
+        echo "$content" | grep "Got new puzzle! Approximately" | \
+            tail -n 1 | awk -F ' ' '{print $8}'
+    }
     nl () { echo "$content" | grep "$1" | wc -l; }
     found () {
         printf "%-18s" "  Found $1s"; echo -n ": "
@@ -888,6 +892,10 @@ summary () {
         "uzi-pool")
             found "Share"
             found "Solution"
+            ns="$(nl "Share")"
+            local sp=$(echo "scale=3 ; $(nhashes) / $SHARE_EASINESS" | bc)
+            local hr=$(echo "scale=3 ; $ns * $sp / 600" | bc)
+            echo "$hs"
             ;;
         "uzi-miner")
             found "Share" "Solution"
