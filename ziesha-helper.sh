@@ -853,21 +853,21 @@ summary () {
     echo -e "  Status          : ${col}$heal${sign}${NONE}"
     echo -e "  Started at      : ${M}$since${NONE}"
     echo -e "  Running for     : ${EW}$runtime${NONE}"
+    sign=" \U203c"; [ "$heal" == "Good" ] && sign=
+    col="${R}"; [ "$heal" == "Good" ] && col="${G}"
     local content
     content=$(journalctl -q -o short-iso-precise --since \
             "$time ago" --user-unit=ziesha@"$a")
     nl () { echo "$content" | grep "$1" | wc -l; }
     found () {
         printf "%-18s" "  Found $1s"; echo -n ": "
-        printf "${R}%4s${NONE}" "$(nl "${2-$1} found by:")";
+        printf "${col}%4s${NONE}" "$(nl "${2-$1} found by:")";
         echo -e " (in last ${time})"; 
     }
     case $a in
         "bazuka")
             ret=$(echo "$content" | grep "Height" | grep "Outdated" | \
                 tail -n 1 | awk -F ' ' '{print $5}')
-            [ "$heal" == "Good" ] && col="${G}" || col="${R}"
-            [ "$heal" == "Bad" ] && sign=" \U203c" || sign=
             echo -ne "  Current Height  : ${col}$ret${sign}${NONE}"
             echo "$content" | grep -q "Height advanced to" &&
                 echo -ne "${col} (Syncing)${NONE}"
@@ -882,17 +882,14 @@ summary () {
                 awk -F ' ' '{print $NF}' | sed 's/ms//g')
             avg=$(echo "$ret" | awk '{ total += $1 } END { print total/NR }' \
                 | sed 's/,/\./g')
-            echo -e "  Avg. Prov. time : ${R}$avg${NONE} ms"
+            echo -e "  Avg. Prov. time : ${col}$avg${NONE} ms"
             ;;
         "uzi-pool")
             found "Share"
             found "Solution"
-            # echo -e "  Found shares    : ${R}$(nl "Share found by:")${NONE} (in last $time)"
-            # echo -e "  Found Solutions : ${R}$(nl "Solution found")${NONE} (in last $time)"
             ;;
         "uzi-miner")
             found "Share" "Solution"
-            # echo -e "  Found Shares : ${R}$(nl "Solution found")${NONE} (in last $time)"
             ;;
         -*)
             _unknown_option "$1"
