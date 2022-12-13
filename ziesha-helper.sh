@@ -870,10 +870,10 @@ summary () {
             [ "$heal" == "Bad" ] && sign=" \U203c" || sign=
             echo -ne "  Current Height  : ${col}$ret${sign}${NONE}"
             echo "$content" | grep -q "Height advanced to" &&
-                echo -e "${col} (Syncing)${NONE}"
+                echo -ne "${col} (Syncing)${NONE}"
             balance=$(bazuka wallet info | grep "Main chain balance:" | \
                       awk -F ' ' '{print $4}')
-            echo -e "  Balance         : ${col}$balance${NONE}"
+            echo -e "\n  Balance         : ${col}$balance${NONE}"
             ;;
         "zoro")
             content=$(journalctl -q -o short-iso-precise --since \
