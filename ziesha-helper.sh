@@ -822,7 +822,7 @@ get_runtime () {
     local content
     content=$(systemctl --user status ziesha@"$a" | grep "Active:")
     content="${content##*; }"
-    echo "${content%% *}"
+    echo "${content:0:$#-4}"
 }
 
 status () {
