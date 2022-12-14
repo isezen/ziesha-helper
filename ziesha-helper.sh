@@ -893,9 +893,12 @@ summary () {
             found "Share"
             found "Solution"
             ns="$(nl "Share")"
-            local sp=$(echo "scale=3 ; $(nhashes) / $SHARE_EASINESS" | bc)
-            local hr=$(echo "scale=3 ; $ns * $sp / (600 * 1000)" | bc)
-            echo -e "  Hashrate        : ${col}$hr${NONE} KH/s"
+            nh= "$(nhashes)"
+            if [ -n "$nh" ]; then
+                local sp=$(echo "scale=3 ; $(nhashes) / $SHARE_EASINESS" | bc)
+                local hr=$(echo "scale=3 ; $ns * $sp / (600 * 1000)" | bc)
+                echo -e "  Hashrate        : ${col}$hr${NONE} KH/s"
+            fi
             ;;
         "uzi-miner")
             found "Share" "Solution"
