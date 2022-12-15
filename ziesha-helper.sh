@@ -825,6 +825,20 @@ get_runtime () {
     echo "${content:0:$#-4}"
 }
 
+# crawle currnet height from log content
+# $1 : log content
+get_current_height () {
+    h1=$(echo "$content" | grep "Height" | grep "Outdated" | \
+         tail -n 1 | awk -F ' ' '{print $5}')
+    h2=$(echo "$content" | grep "Height advanced to" | \
+         tail -n 1 | awk -F ' ' '{print $7}')
+    if [ -n "$h2" ]; then
+        h2="${h2::-1}"
+        [ "$h1" -lt "$h2" ] && h1="$h2"
+    fi
+    echo "$h1"
+}
+
 status () {
     local a=${1:-all}
     if ! check_a status "$a"; then
@@ -871,11 +885,10 @@ summary () {
     }
     case $a in
         "bazuka")
-            ret=$(echo "$content" | grep "Height" | grep "Outdated" | \
-                tail -n 1 | awk -F ' ' '{print $5}')
-            echo -ne "  Current Height  : ${col}$ret${sign}${NONE}"
+            height="$(get_current_height)"
+            echo -ne "  Current Height  : ${col}$height${sign}${NONE}"
             echo "$content" | grep -q "Height advanced to" &&
-                echo -ne "${col} (Syncing)${NONE}"
+                echo -ne "${Y} (Syncing)${NONE}"
             balance=$(bazuka wallet info | grep "Main chain balance:" | \
                       awk -F ' ' '{print $4}')
             echo -e "\n  Balance         : ${col}$balance${NONE}"
