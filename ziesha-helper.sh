@@ -460,7 +460,7 @@ show_log () {
     local timestamp=false
     local a=${1:-bazuka}; shift
     ! contains "$APPS" "$a" && 
-    { msg_err "$a is not a Ziesha tool. ('$APPS')"; echo -e ''; exit 1; }
+        { msg_err "$a is not a Ziesha tool. ('$APPS')"; echo -e ''; exit 1; }
 
     if ([ "$a" = "auto-update" ] || is_installed "$a"); then
         while [[ $# -gt 0 ]]; do
@@ -492,10 +492,14 @@ show_log () {
         cmd+=" | stdbuf -oL cut --complement -d' ' -f2,3"
         cmd+=" | sed -u 's/\(:[0-9][0-9]\)\.[0-9]\{6\}/\1/g'"
         cmd+=" | sed -u 's/\+0000//'"
-        if [[ "${short}" == "true" ]]; then
-             cmd+=" | sed -u -e 's/Height/H/' -e 's/Outdated states/ODs/'"
-             cmd+=" -e 's/Timestamp/TS/' -e 's/Active nodes/AcN/'"
-             cmd+=" -e 's/Chain Pool/CHp/' -e 's/MPN Pool/MPNp/'"
+        if [[ "$a" == "bazuka" ]]; then
+            if [[ "${short}" == "true" ]]; then
+                cmd+=" | sed -u -e 's/Height/H/' -e 's/Outdated states/ODs/'"
+                cmd+=" -e 's/Timestamp/TS/' -e 's/Active nodes/AcN/'"
+                cmd+=" -e 's/Chain Pool/CHp/' -e 's/MPN Pool/MPNp/'"
+            fi
+        elif [[ "$a" == "uzi-pool" ]]; then
+            cmd+="sed -ur 's/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{5} \+[0-9]{2}:[0-9]{2} -> //g'"
         fi
         [[ "${color}" == "true" && $(which ccze) ]] && cmd+=" |  ccze -Ar"
         if [[ "${timestamp}" == "true" ]]; then
@@ -828,7 +832,7 @@ get_runtime () {
 # crawle currnet height from log content
 # $1 : log content
 get_current_height () {
-    h1=$(echo "$content" | grep "Height" | grep "Outdated" | \
+    h1=$(echo "$content" | grep "Outdated states" | \
          tail -n 1 | awk -F ' ' '{print $5}')
     h2=$(echo "$content" | grep "Height advanced to" | \
          tail -n 1 | awk -F ' ' '{print $7}')
@@ -837,6 +841,13 @@ get_current_height () {
         [ "$h1" -lt "$h2" ] && h1="$h2"
     fi
     echo "$h1"
+}
+
+# crawle currnet height from log content
+# $1 : log content
+get_active_nodes () {
+    echo "$content" | grep "Outdated states" | \
+        tail -n 1 | awk -F ' ' '{print $13}'
 }
 
 status () {
@@ -891,6 +902,7 @@ summary () {
                 echo -ne "${Y} (Syncing)${NONE}"
             balance=$(bazuka wallet info | grep "Main chain balance:" | \
                       awk -F ' ' '{print $4}')
+            echo -ne "\n  Active Nodes    : ${col}$(get_active_nodes)${NONE}"
             echo -e "\n  Balance         : ${col}$balance${NONE}"
             ;;
         "zoro")
