@@ -893,7 +893,7 @@ summary () {
             found "Share"
             found "Solution"
             ns="$(nl "Share")"
-            nh= "$(nhashes)"
+            nh="$(nhashes)"
             if [ -n "$nh" ]; then
                 local sp=$(echo "scale=3 ; $(nhashes) / $SHARE_EASINESS" | bc)
                 local hr=$(echo "scale=3 ; $ns * $sp / (600 * 1000)" | bc)
