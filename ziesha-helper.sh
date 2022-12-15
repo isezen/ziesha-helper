@@ -499,7 +499,7 @@ show_log () {
                 cmd+=" -e 's/Chain Pool/CHp/' -e 's/MPN Pool/MPNp/'"
             fi
         elif [[ "$a" == "uzi-pool" ]]; then
-            cmd+="sed -ur 's/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{5} \+[0-9]{2}:[0-9]{2} -> //g'"
+            cmd+="| sed -ur 's/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{5} \+[0-9]{2}:[0-9]{2} -> //g'"
         fi
         [[ "${color}" == "true" && $(which ccze) ]] && cmd+=" |  ccze -Ar"
         if [[ "${timestamp}" == "true" ]]; then
@@ -815,7 +815,7 @@ health () {
 get_since () {
     local a=${1:-bazuka}
     local content
-    content=$(systemctl --user status ziesha@"$a" | grep "Active:")
+    content=$(systemctl --user --timestamp=utc status ziesha@"$a" | grep "Active:")
     content="${content#*since }"
     echo "${content%%;*}"
 }
