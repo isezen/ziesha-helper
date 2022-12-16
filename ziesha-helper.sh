@@ -843,21 +843,8 @@ get_current_height () {
          tail -n 1 | awk -F ' ' '{print $5}')
     h2=$(echo "$content" | grep "Height advanced to" | \
          tail -n 1 | awk -F ' ' '{print $7}')
-
-    [ -n "$h2" ] && [ -z "$h1" ] && h1="${h2::-1}" ||
-        { h2="${h2::-1}"; [ "$h1" -lt "$h2" ] && h1="$h2"; }
-
-    # if [ -n "$h2" ]; then
-    #     [ -z "$h1" ] && h1="${h2::-1}" ||
-    #         { h2="${h2::-1}"; [ "$h1" -lt "$h2" ] && h1="$h2"; }
-    # fi
-
-    #   if [ -z "$h1" ] && [ -n "$h2" ]; then
-    #       h1="${h2::-1}"
-    #   elif [ -n "$h2" ] && [ -n "$h1" ]; then
-    #       h2="${h2::-1}"
-    #       [ "$h1" -lt "$h2" ] && h1="$h2"
-    #   fi
+    [ -n "$h2" ] && { [ -z "$h1" ] && h1="${h2::-1}" ||
+        { h2="${h2::-1}"; [ "$h1" -lt "$h2" ] && h1="$h2"; }; }
       echo "$h1"
 }
 
