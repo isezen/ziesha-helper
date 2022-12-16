@@ -32,6 +32,8 @@ service_ziesha=$(cat <<EOF
 [Unit]
 Description=Ziesha %i Daemon
 After=network-online.target
+StartLimitIntervalSec=20
+StartLimitBurst=5
 
 [Service]
 Type=simple
@@ -705,6 +707,11 @@ run () {
             if echo "$ret" | grep -q "LOCK: Resource temporarily unavailable"; then
                 ylw "------------------------------"; echo -e ""
                 msg_info "bazuka is already running..."
+                echo -e ""
+                exit 0
+            elif echo "$ret" | grep -q "Bazuka is not initialized!"; then
+                ylw "------------------------------"; echo -e ""
+                msg_info "Bazuka is not initialized."
                 echo -e ""
                 exit 0
             else
