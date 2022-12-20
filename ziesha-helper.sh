@@ -872,7 +872,7 @@ status () {
             ;;
             "Moderate")
                 col="${EY}"
-                sign="\U1F550"
+                sign="\U23F3"
             ;;
             *)
         esac
@@ -900,7 +900,7 @@ summary () {
         ;;
         "Moderate")
             col="${EY}"
-            sign="\U1F550"
+            sign="\U23F3"
         ;;
         *)
     esac
