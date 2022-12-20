@@ -162,7 +162,7 @@ get_pass () {
 # Args:
 #    $1: Question prompt
 is_yes () {
-    prompt=${1:-"Do you want?"}
+    prompt=${1:-""}
     default=${2:-"n"}
     prompt+=$([ "$default" == "y" ] && echo " ([y]/n) " || echo " (y/[n]) ")
     while true; do
