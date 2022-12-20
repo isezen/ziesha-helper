@@ -937,9 +937,10 @@ summary () {
             echo -ne "  Current Height  : ${col}$height${sign}${NONE}"
             echo "$content" | grep -q "Height advanced to" &&
                 echo -ne "${Y} (Syncing)${NONE}"
-            balance=$(bazuka wallet info | grep "Main chain balance:" | \
-                      awk -F ' ' '{print $4}')
             echo -ne "\n  Active Nodes    : ${col}$(get_active_nodes)${NONE}"
+            balance=$(bazuka wallet info | grep "Ziesha:" | \
+                      awk -F ' ' '{print $2}')
+            [ -z "$balance" ] && balance="0.0\U2124"
             echo -e "\n  Balance         : ${col}$balance${NONE}"
             ;;
         "zoro")
