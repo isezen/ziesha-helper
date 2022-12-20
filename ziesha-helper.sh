@@ -768,9 +768,12 @@ download () {
             file=$WITHDRAW_DAT
             url="https://api.rues.info/withdraw.dat" ;;
         all)
-        download update-dat
-        download deposit-dat
-        download withdraw-dat
+            ylw "This process may take a long time."; echo
+            ylw "Are you sure to download all dat files?"
+            ! is_yes && return 0
+            download update-dat
+            download deposit-dat
+            download withdraw-dat
         ;;
         *)
             _unknown_option "$1"; exit 1 ;;
@@ -799,10 +802,10 @@ health () {
             "bazuka")
                 ret=$(echo "$content" | grep "Height" | grep "Outdated" | \
                     awk -F ' ' '{print $5}' | sort -n | uniq)
-                [ -n "$ret" ] && 
-                { [[ $(echo "$ret" | wc -l) -eq 1 ]] && 
+                [ -n "$ret" ] &&  { [[ $(echo "$ret" | wc -l) -eq 1 ]] && 
                     { echo "$content" | grep -q "Height advanced to" && 
-                        ret="Good" || ret="Bad"; } || ret="Good" ;} || ret="Bad"
+                        ret="Good" || ret="Moderate"; } || ret="Good" ;} || 
+                            ret="Bad"
                 ;;
             "zoro")
                 is_in "Proving took:" && ret="Good" || ret="Bad" ;;
@@ -860,8 +863,19 @@ status () {
     if ! check_a status "$a"; then
         ! service_is_active "$a" && { return; }
         local heal; heal=$(health "$a")
-        local sign="${CROSS}"; [ "$heal" == "Good" ] && sign="${CHECK}"
-        local col="${ER}"; [ "$heal" == "Good" ] && col="${EG}"
+        local col="${ER}"
+        local sign="${CROSS}"
+        case "$heal" in
+            "Good")
+                col="${EG}"
+                sign="${CHECK}"
+            ;;
+            "Moderate")
+                col="${EY}"
+                sign="\U1F550"
+            ;;
+            *)
+        esac
         printf "${C}%-9s" "$a"; ylw ": "; echo -e "${col}$heal${sign}${NONE}"
     fi
 }
@@ -875,8 +889,22 @@ summary () {
     local heal; heal=$(health "$a")
     local since; since=$(get_since "$a")
     local runtime; runtime=$(get_runtime "$a")
-    local sign="\U26D4"; [ "$heal" == "Good" ] && sign="${CHECK}"
-    local col="${ER}"; [ "$heal" == "Good" ] && col="${EG}"
+    local col="${ER}"
+    local sign="\U26D4"
+    local col="${ER}"
+
+    case "$heal" in
+        "Good")
+            col="${EG}"
+            sign="${CHECK}"
+        ;;
+        "Moderate")
+            col="${EY}"
+            sign="\U1F550"
+        ;;
+        *)
+    esac
+
     vl=$(version local "$a"); vr=$(version remote "$a")
     cyn "$a v$vl:"
     need_update "$a" && echo -ne " ${EY}(New version v$vr)${NONE}"
@@ -884,8 +912,12 @@ summary () {
     echo -e "  Status          : ${col}$heal${sign}${NONE}"
     echo -e "  Started at      : ${M}$since${NONE}"
     echo -e "  Running for     : ${EW}$runtime${NONE}"
-    sign=" \U203c"; [ "$heal" == "Good" ] && sign=
-    col="${R}"; [ "$heal" == "Good" ] && col="${G}"
+    if [ "$heal" == "Good" ]; then
+        sign=
+        col="${G}"
+    else
+        sign=" \U203c"
+    fi
     local content
     content=$(journalctl -q -o short-iso-precise --since \
             "$time ago" --user-unit=ziesha@"$a")
