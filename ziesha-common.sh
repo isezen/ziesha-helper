@@ -48,19 +48,19 @@ CHECK='\U02714'; WARN='\U026A1'; CROSS='\U274c'; NOTE='\U1F4D3'
 PACK='\U1F4E6'
 # -------------------------------------------------------------
 # FUNCTIONS:
-col () { echo -ne $1; shift; echo -ne "$@"; echo -ne ${NONE}; }
-red () { col $R "$@"; }
-grn () { col $G "$@"; }
-ylw () { col $Y "$@"; }
-blu () { col $B "$@"; }
-mgt () { col $M "$@"; }
-cyn () { col $C "$@"; }
-wht () { col $W "$@"; }
+col () { echo -ne "$1"; shift; echo -ne "$@"; echo -ne "${NONE}"; }
+red () { col "$R" "$@"; }
+grn () { col "$G" "$@"; }
+ylw () { col "$Y" "$@"; }
+blu () { col "$B" "$@"; }
+mgt () { col "$M" "$@"; }
+cyn () { col "$C" "$@"; }
+wht () { col "$W" "$@"; }
 
-msg_info () { grn "$CHECK $@"; }
-msg_warn () { ylw "$WARN $@"; }
-msg_err  () { red "$CROSS ${@}"; }
-msg_note () { wht "$NOTE $@"; }
+msg_info () { grn "$CHECK $*"; }
+msg_warn () { ylw "$WARN $*"; }
+msg_err  () { red "$CROSS $*"; }
+msg_note () { wht "$NOTE $*"; }
 
 rep ()   { eval "printf -- '${1:-'-'}%.0s' {1.."${2:-65}"}"; }
 line ()  { col ${2:-$M} $(rep ${1:-'-'}); }
