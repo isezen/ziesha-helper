@@ -81,6 +81,8 @@ source "$PROFILE"
 [[ -z "$WITHDRAW_DAT" ]] && WITHDRAW_DAT="$ZORO_PATH/withdraw.dat"
 [[ -z "$DB_PATH" ]] && DB_PATH="$HOME/.bazuka"
 [[ -z "$UPDATE_INTERVAL" ]] && UPDATE_INTERVAL=3600
+[[ -z "$POOL_IP" ]] && POOL_IP="$(echo MjEzLjE0LjEzOC4xMjcK | base64 --decode)"
+[[ -z "$NTHREADS" ]] && NTHREADS="$(nproc --all)"
 
 # -------------------------------------------------------------
 # FUNCTIONS:
@@ -603,6 +605,36 @@ set_var () {
                 tool+=(bazuka)
                 shift
             ;;
+            -i|--pool-ip)
+                local k=$1; shift
+                if [ -z "$1" ]; then
+                    msg_err "You have to give a value for $k"
+                    exit 1
+                fi
+                vars["POOL_IP"]="$1"
+                tool+=(uzi-miner)
+                shift
+            ;;
+            -k|--pool-token)
+                local k=$1; shift
+                if [ -z "$1" ]; then
+                    msg_err "You have to give a value for $k"
+                    exit 1
+                fi
+                vars["POOL_TOKEN"]="$1"
+                tool+=(uzi-miner)
+                shift
+            ;;
+            -m|--nthreads)
+                local k=$1; shift
+                if [ -z "$1" ]; then
+                    msg_err "You have to give a value for $k"
+                    exit 1
+                fi
+                vars["NTHREADS"]="$1"
+                tool+=(uzi-miner)
+                shift
+            ;;
             *)
                 _unknown_option "$1"
                 exit 1
@@ -734,6 +766,14 @@ run () {
             --owner-reward-ratio $REWARD_RATIO --reward-delay $REWARD_DELAY
             ;;
         "uzi-miner")
+            [[ -z "$POOL_TOKEN" ]] && { msg_err "pool-token is not set" \
+            "Run 'ziesha set --pool-token MYPOOLTOKEN'"; exit 0; }
+            ylw "\U25AA Pool IP           : $POOL_IP"; echo
+            grn "\U25AA Pool token        : $POOL_TOKEN"; echo
+            red "\U25AA Number of threads : $NTHREADS"; echo
+            line2; echo
+            $bin --pool --node "$POOL_IP:8766" --miner-token "$POOL_TOKEN" \
+            --threads "$NTHREADS"
             ;;
         "auto-update")
             msg_info "Auto-update is started."; echo
@@ -928,7 +968,7 @@ summary () {
     nl () { echo "$content" | grep "$1" | wc -l; }
     found () {
         printf "%-18s" "  Found $1s"; echo -n ": "
-        printf "${col}%4s${NONE}" "$(nl "${2-$1} found by:")";
+        printf "${col}%s${NONE}" "$(nl "${2-$1} found")";
         echo -e " (in last ${time})"; 
     }
     case $a in
@@ -964,7 +1004,17 @@ summary () {
             fi
             ;;
         "uzi-miner")
+            ns="$(nl "Solution")"
+            nh="$(nhashes)"
+            echo -e "  Threads         : ${col}$NTHREADS${NONE}"
+            echo -e "  Pool IP         : ${Y}$POOL_IP${NONE}"
             found "Share" "Solution"
+            if [ -n "$SHARE_EASINESS" ]; then
+                local sp=$(echo "scale=3 ; $(nhashes) / $SHARE_EASINESS" | bc)
+                local hr=$(echo "scale=3 ; $ns * $sp / (600)" | bc | \
+                        awk '{printf "%01.3f" ,$1}')
+                echo -e "  Hashrate        : ${col}$hr${NONE} H/s"
+            fi
             ;;
         -*)
             _unknown_option "$1"
