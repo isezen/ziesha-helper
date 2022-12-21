@@ -208,6 +208,10 @@ function _usage_set () {
      -d | --discord-handle  : Your discord handle
      -n | --network         : Network name
      -u | --update-interval : Auto-update interval [0;33m(Default is $UPDATE_INTERVAL seconds)[0m
+    [0;33mMINER:[0m
+     -i | --pool-ip         : IP of the pool to connect   [0;33m(Default is $POOL_IP)[0m
+     -k | --pool-token      : Access Token of the pool
+     -m | --nthreads        : Number of threads for miner [0;33m(Default is $NTHREADS)[0m
     [0;33mPOOL:[0m
      -c | --share-capacity  : Share Capacity [0;33m(Default is $SHARE_CAPACITY)[0m
      -e | --share-easiness  : Share Easiness [0;33m(Default is $SHARE_EASINESS)[0m
