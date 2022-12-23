@@ -979,7 +979,7 @@ summary () {
                 echo -ne "${Y} (Syncing)${NONE}"
             echo -ne "\n  Active Nodes    : ${col}$(get_active_nodes)${NONE}"
             balance=$(bazuka wallet info | grep "Ziesha:" | \
-                      awk -F ' ' '{print $2}')
+                      awk -F ' ' '{print $3}')
             [ -z "$balance" ] && balance="0.0\U2124"
             echo -e "\n  Balance         : ${col}$balance${NONE}"
             ;;
