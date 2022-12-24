@@ -1009,7 +1009,7 @@ summary () {
             echo -e "  Threads         : ${col}$NTHREADS${NONE}"
             echo -e "  Pool IP         : ${Y}$POOL_IP${NONE}"
             found "Share" "Solution"
-            if [ -n "$SHARE_EASINESS" ]; then
+            if [ -n "$SHARE_EASINESS" ] && [ -n "$nh" ]; then
                 local sp=$(echo "scale=3 ; $(nhashes) / $SHARE_EASINESS" | bc)
                 local hr=$(echo "scale=3 ; $ns * $sp / (600)" | bc | \
                         awk '{printf "%01.3f" ,$1}')
