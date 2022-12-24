@@ -215,11 +215,6 @@ to_install () {
 # Args:
 #    $1: Name of packages to install
 install_pkg () {
-    if ! is_sudo; then
-        msg_warn "You don't have sudo priviliges."; echo
-        ylw "sudo apt install $1"
-        return;
-    fi
     local dist=$(get_linux_dist)
     if [ "$dist" == "Ubuntu" ]; then
         sudo apt update > /dev/null 2>&1
@@ -249,6 +244,11 @@ install () {
     local footer="${3:-"Dependencies installed"}"
     local installed=false
     if test -n "$to_install"; then
+        if ! is_sudo; then
+            msg_warn "You don't have sudo priviliges."; echo
+            wht "  sudo apt install$1"; echo
+            return;
+        fi
         installed=true
         ylw "$header"; echo -e ''
         install_pkg "$to_install"
