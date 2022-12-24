@@ -733,7 +733,6 @@ run () {
         "bazuka")
             [[ -z "$DISCORD_HANDLE" ]] && { msg_err "discord-handle " \
             "is not set. Run 'ziesha set discord-handle MYHANDLE'"; exit 0; }
-            # $bin node start --discord-handle "$DISCORD_HANDLE"
             { ret="$( { $bin node start --discord-handle "$DISCORD_HANDLE"; } 2>&1 1>&3 3>&- )"; } 3>&1;
             echo "RUST_BACKTRACE: $RUST_BACKTRACE"
             echo "$HOME"
