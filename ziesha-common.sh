@@ -246,7 +246,7 @@ install () {
     if test -n "$to_install"; then
         if ! is_sudo; then
             msg_warn "You don't have sudo priviliges."; echo
-            ylw "    Install required packages manually:"; echo
+            ylw "   Install required packages manually:"; echo
             col "$EW" "   sudo apt install$to_install"; echo
             return;
         fi
