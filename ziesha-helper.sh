@@ -778,9 +778,8 @@ run () {
             ;;
         "auto-update")
             msg_info "Auto-update is started."; echo
-            installed_apps=$(get_installed_tools)
-            echo "$installed_apps"
-            while true; do  
+            while true; do
+                installed_apps=$(get_installed_tools)
                 update_app "$installed_apps"
                 sleep $UPDATE_INTERVAL
             done
