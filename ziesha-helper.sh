@@ -316,6 +316,7 @@ check_a () {
 
 # Install/update ziesha-helper
 install_me () {
+    loginctl enable-linger "$USER"
     install_deps
     mkdir -p "$HOME/.local/bin" && a2p
     mkdir -p "$ZIESHA_HELPER_PATH" && {
