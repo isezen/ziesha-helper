@@ -720,7 +720,7 @@ run () {
             msg_err "$a is not a Ziesha tool. ('$APPS')"; echo -e ''
             exit 1
         fi
-        local rem="$@"
+        local rem="$*"
         if ! is_installed "$a"; then
             msg_err "$a is NOT installed. Run 'ziesha install $a'."; echo -e ''
             exit 0
