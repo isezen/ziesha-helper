@@ -115,10 +115,10 @@ function _usage_run () {
     zoro      : $1 zoro
 
   $USAGE[0;49;96m
-    $ $EXE run bazuka [0;33m# will run bazuka[0;49;96m
-    $ $EXE run zoro   [0;33m# will run zoro[0;49;96m
-    $ $EXE run zoro   [0;33m# will run uzi-pool[0;49;96m
-    $ $EXE run zoro   [0;33m# will run uzi-miner[0m
+    $ $EXE run bazuka    [0;33m# will run bazuka[0;49;96m
+    $ $EXE run zoro      [0;33m# will run zoro[0;49;96m
+    $ $EXE run uzi-pool  [0;33m# will run uzi-pool[0;49;96m
+    $ $EXE run uzi-miner [0;33m# will run uzi-miner[0m
 
 EOF
 }
@@ -326,11 +326,9 @@ function _usage_service () {
     uzi-miner   : $1 uzi-miner
     uzi-pool    : $1 uzi-pool
     zoro        : $1 zoro
-    auto-update : $1 auto-update
 
   $USAGE[0;49;96m
     $ $EXE start bazuka      [0;33m# will start bazuka in background[0;49;96m
-    $ $EXE start auto-update [0;33m# will start auto-update[0;49;96m
     $ $EXE stop zoro         [0;33m# will stop if it is running[0;49;96m
     $ $EXE restart uzi-pool  [0;33m# will restart uzi-pool[0m
 
