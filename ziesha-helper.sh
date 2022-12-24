@@ -371,7 +371,7 @@ need_update () { [ "$(version local "$1")" != "$(version remote "$1")" ]; }
 # Update given Ziesha app or rust
 update_app () {
     local vc; local vr;
-    local a=${@:-bazuka}
+    local a=${*:-bazuka}
     if [ "$a" = "rust" ]; then
         rustup self update; return
     fi
@@ -779,6 +779,7 @@ run () {
         "auto-update")
             msg_info "Auto-update is started."; echo
             installed_apps=$(get_installed_tools)
+            echo "$installed_apps"
             while true; do  
                 update_app "$installed_apps"
                 sleep $UPDATE_INTERVAL
@@ -1154,10 +1155,5 @@ while [[ $# -gt 0 ]]; do
 done
 
 set -- "${POSITIONAL_ARGS[@]}"
-
-# if [ "$func" != "list" ]; then
-#     [[ -z "${1+x}" ]] && { show_help "$long_opt"; exit 0; }
-# fi
-# echo "func: $func"
 [ -n "$func" ] && { $func "${POSITIONAL_ARGS[@]}"; } ||
     { [[ -z "${1+x}" ]] && { show_help "$long_opt"; exit 0; } }
