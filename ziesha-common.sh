@@ -67,6 +67,9 @@ line ()  { col ${2:-$M} $(rep ${1:-'-'}); }
 line1 () { line; }
 line2 () { line '=' ${1:-$M}; }
 
+# Check if current user has sudo access
+is_sudo () { groups | grep -q sudo; }
+
 # Check if $1 contains $2
 contains () { [[ $1 =~ (^|[[:space:]])"$2"($|[[:space:]]) ]]; }
 
@@ -182,11 +185,11 @@ is_yes () {
 #   $1: Name of package
 is_pkg_exist () {
     local dist=$(get_linux_dist)
-    if [ $dist == "Ubuntu" ]; then
-      [ -z "$(dpkg -l | grep $1)" ]
-    elif [ $dist == "macos" ]; then
+    if [ "$dist" == "Ubuntu" ]; then
+      [ -z "$(dpkg -l | grep "$1")" ]
+    elif [ "$dist" == "macos" ]; then
         if [ -f "$(which port)" ]; then
-            ret=$(port installed $1)
+            ret=$(port installed "$1")
             [ "$ret" != "None of the specified ports are installed." ]
         fi
     fi
@@ -198,12 +201,12 @@ to_install () {
     local to_install=
     for p in $1
     do
-        if is_pkg_exist $p; then
+        if is_pkg_exist "$p"; then
             to_install+=" $p"
         fi
 
     done
-    echo $to_install
+    echo "$to_install"
 }
 
 # Multiple Install function
@@ -212,17 +215,22 @@ to_install () {
 # Args:
 #    $1: Name of packages to install
 install_pkg () {
+    if ! is_sudo; then
+        msg_warn "You don't have sudo priviliges."; echo
+        ylw "sudo apt install $1"
+        return;
+    fi
     local dist=$(get_linux_dist)
-    if [ $dist == "Ubuntu" ]; then
+    if [ "$dist" == "Ubuntu" ]; then
         sudo apt update > /dev/null 2>&1
         sudo apt install "$1" -y > /dev/null 2>&1
-    elif [ $dist == "macos" ]; then
+    elif [ "$dist" == "macos" ]; then
         if [ -f "$(which port)" ]; then
             sudo port install "$1" > /dev/null 2>&1
         fi
     else
-        col $BGR "Installing dependencies on $dist is not supported."
-        col $BGR "You need to make sure install dependencies manually."
+        col "$BGR" "Installing dependencies on $dist is not supported."
+        col "$BGR" "You need to make sure install dependencies manually."
     fi
 }
 
