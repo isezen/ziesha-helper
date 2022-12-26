@@ -270,13 +270,15 @@ install_app () {
     echo -e ''
 }
 
+# check update is needed for a tool
+need_update () { [ "$(version local "$1")" != "$(version remote "$1")" ]; }
+
 # Update given Ziesha app or rust
 update_app () {
     local vc; local vr;
     local a=${*:-bazuka}
     [ "$a" = "me" ] && { install_me; return; }
     [ "$a" = "rust" ] && { rustup self update; return; }
-    need_update () { [ "$(version local "$1")" != "$(version remote "$1")" ]; }
     check_rust_installed
     if ! check_a update_app "$a"; then
         if is_installed "$a"; then
