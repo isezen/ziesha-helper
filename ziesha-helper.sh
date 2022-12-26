@@ -248,37 +248,33 @@ service () {
 
     case $status in
         start)
-            service_is_active "$a" && 
-            { msg_warn "$a is already running."; echo; return; }
+            # service_is_active "$a" && 
+            # { msg_warn "$a is already running."; echo; return; }
             service enable "$a"; msg_info "$a is started."; echo
         ;;
         stop)
-            ! service_is_active "$a" && 
-            { msg_warn "$a is not active. Run 'ziesha start $a'"; echo; return; }
+            # ! service_is_active "$a" && 
+            # { msg_warn "$a is not active. Run 'ziesha start $a'"; echo; return; }
             service disable "$a"; msg_info "$a is stopped successfully."; echo
         ;;
         restart)
-            ! service_is_active "$a" &&
-            { msg_warn "$a is not active. Run 'ziesha start $a'"; echo; return; }
+            # ! service_is_active "$a" &&
+            # { msg_warn "$a is not active. Run 'ziesha start $a'"; echo; return; }
             systemctl --user restart ziesha@"$a"
             msg_info "$a is restarted."; echo
         ;;
         enable)
-            if ! service_is_active "$a"; then
-                # Save Ziesha service file file to systemd path
-                [ ! -d "$SYSTEMD_PATH" ] && mkdir -p "$SYSTEMD_PATH"
-                if [ ! -f "$SYSTEMD_PATH/ziesha@.service" ]; then
-                    save_embedded_content service
-                fi
-                systemctl --user "$status" --now ziesha@"$a" >> "$LOG_FILE" 2>&1
-                systemctl --user daemon-reload >> "$LOG_FILE" 2>&1
+            # Save Ziesha service file file to systemd path
+            [ ! -d "$SYSTEMD_PATH" ] && mkdir -p "$SYSTEMD_PATH"
+            if [ ! -f "$SYSTEMD_PATH/ziesha@.service" ]; then
+                save_embedded_content service
             fi
+            systemctl --user "$status" --now ziesha@"$a" >> "$LOG_FILE" 2>&1
+            systemctl --user daemon-reload >> "$LOG_FILE" 2>&1
         ;;
         disable)
-            if service_is_active "$a"; then
-                systemctl --user "$status" --now ziesha@"$a" >> "$LOG_FILE" 2>&1
-                systemctl --user daemon-reload >> "$LOG_FILE" 2>&1
-            fi
+            systemctl --user "$status" --now ziesha@"$a" >> "$LOG_FILE" 2>&1
+            systemctl --user daemon-reload >> "$LOG_FILE" 2>&1
         ;;
         *)
             _unknown_option "$status"; exit 1 ;;
