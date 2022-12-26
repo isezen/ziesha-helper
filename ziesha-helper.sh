@@ -312,7 +312,7 @@ install_me () {
     mkdir -p "$HOME/.local/bin" && a2p
     mkdir -p "$ZIESHA_HELPER_PATH" && {
         for f in ziesha-helper.sh ziesha-common.sh ziesha-usage.sh \
-                 VERSION AUTHOR; do
+                 ziesha-summary.sh VERSION AUTHOR; do
             curl -s -o "$ZIESHA_HELPER_PATH/$f" "$ZIESHA_URL/$f"
         done
         curl -s -o "$HOME/.local/bin/ziesha" "$ZIESHA_URL/ziesha"
