@@ -216,50 +216,44 @@ service_is_active () { systemctl --user is-active --quiet ziesha@"$1"; }
 
 # Start/stop/restart/enable/disable a Ziesha service
 service () {
-    local status=${1:-enable}
-    local a=${2:-bazuka}
-    if ! contains "$APPS auto-update all" "$a"; then
-        msg_err "Unknown argument: $a. ('$APPS auto-update all')"; echo -e ''
+    local status=${1:-enable}; shift
+    local a="$1"
+    [ -z "${a}" ] && 
+        { is_yes "Are you sure to $status all Ziesha tools?" &&  a="all" || 
+            return 0; }
+    if ! contains "$APPS all" "$a"; then
+        msg_err "Unknown argument: $a. ('$APPS all')"; echo -e ''
         exit 1
     fi
     if [ "$a" = "all" ]; then
         local services
-        services="$(get_installed_tools) auto-update"
+        services="$(get_installed_tools)"
         if [ "$status" == "start" ]; then
             for s in $services; do service start "$s"; done
         else
             local active_services
             active_services=$(get_running_services)
-            if [ -z "$active_services" ]; then
-                msg_warn "No active services"; echo; return
-            fi
-            [ "$status" == "stop" ] && 
-            ! is_yes "Do you want to stop all services?" && return
+            [ -z "$active_services" ] && 
+                { msg_warn "No active services"; echo; return; }
             for s in $active_services; do service "$status" "$s"; done
         fi
         return
     fi
 
     # check if arg is a service or not
-    if ! contains "$(get_installed_tools) auto-update" "$a"; then 
+    if ! contains "$(get_installed_tools)" "$a"; then 
         msg_err "$a is not installed. Please, first install."; echo
         return
     fi
 
     case $status in
         start)
-            # service_is_active "$a" && 
-            # { msg_warn "$a is already running."; echo; return; }
             service enable "$a"; msg_info "$a is started."; echo
         ;;
         stop)
-            # ! service_is_active "$a" && 
-            # { msg_warn "$a is not active. Run 'ziesha start $a'"; echo; return; }
             service disable "$a"; msg_info "$a is stopped successfully."; echo
         ;;
         restart)
-            # ! service_is_active "$a" &&
-            # { msg_warn "$a is not active. Run 'ziesha start $a'"; echo; return; }
             systemctl --user restart ziesha@"$a"
             msg_info "$a is restarted."; echo
         ;;
