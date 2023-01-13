@@ -655,7 +655,7 @@ run () {
         "zoro")
             [[ -z "$ZORO_SEED" ]] && { msg_err "zoro-seed is not set" \
             "Run 'ziesha set zoro-seed MYSEED'"; exit 0; }
-            $bin --node 127.0.0.1:8765 --seed "$ZORO_SEED" \
+            $bin start --node 127.0.0.1:8765 --seed "$ZORO_SEED" \
             --update-circuit-params "$UPDATE_DAT" \
             --deposit-circuit-params "$DEPOSIT_DAT" \
             --withdraw-circuit-params "$WITHDRAW_DAT" \
